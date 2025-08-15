@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <!-- Firebase App (base) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+  <!-- Firestore (banco de dados) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"></script>
+  
+  <title>Sistema de Empréstimos</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD0bjBn8OzDpZrimCXhLgwD7J5BKJvLIA",
+      authDomain: "sistema-emprestimos-6d020.firebaseapp.com",
+      projectId: "sistema-emprestimos-6d020",
+      storageBucket: "sistema-emprestimos-6d020.appspot.com",
+      messagingSenderId: "739490314404",
+      appId: "1:739490314404:web:1dfdb0a0a208aa0c951571",
+      measurementId: "G-XDMP1KJ4N0"
+    };
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  </script>
+</head>
+<body data-color-scheme="dark">
+  <!-- Login Page -->
+  <div class="login-container" id="loginContainer">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="app-icon">💰</div>
+        <h1 class="login-title">Sistema de Empréstimos</h1>
+        <p class="login-subtitle">Faça login para continuar</p>
+      </div>
+      <form class="login-form" id="loginForm">
+        <div class="form-group">
+          <label class="form-label" for="loginUsuario">Usuário</label>
+          <input type="text" id="loginUsuario" class="form-control" placeholder="Digite: admin" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="loginSenha">Senha</label>
+          <input type="password" id="loginSenha" class="form-control" placeholder="Digite: 123456" required />
+        </div>
+        <div class="login-error hidden" id="loginError">Usuário ou senha inválidos</div>
+        <button type="submit" class="btn btn--primary btn--full-width login-btn" id="loginBtn">
+          <span class="login-btn-text">Entrar</span>
+          <span class="login-btn-loading hidden">Entrando...</span>
+        </button>
+      </form>
+      <div style="margin-top: 1rem; text-align: center; color: #8D8D99; font-size: 0.8rem;">
+        <p><strong>Logins de teste:</strong></p>
+        <p>Admin: admin / 123456</p>
+        <p>Gerente: gerente / 123456</p>
+        <p>Operador: operador / 123456</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Application -->
+  <div class="app-container hidden" id="appContainer">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h2 class="sidebar-title">💰 Empréstimos</h2>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-page="dashboard">
+          <span class="nav-icon">📊</span>
+          <span class="nav-text">Dashboard</span>
+        </button>
+        <button class="nav-item" data-page="clientes">
+          <span class="nav-icon">👤</span>
+          <span class="nav-text">Clientes</span>
+        </button>
+        <button class="nav-item" data-page="emprestimos">
+          <span class="nav-icon">📋</span>
+          <span class="nav-text">Empréstimos</span>
+        </button>
+        <button class="nav-item" data-page="historico">
+          <span class="nav-icon">📈</span>
+          <span class="nav-text">Histórico</span>
+        </button>
+        <button class="nav-item admin-only hidden" data-page="usuarios">
+          <span class="nav-icon">👥</span>
+          <span class="nav-text">Usuários</span>
+        </button>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="header">
+        <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+        <h1 class="page-title" id="pageTitle">Dashboard</h1>
+        <div class="header-user">
+          <span class="user-info">
+            <span class="user-name" id="userName">Usuário</span>
+            <span class="user-role" id="userRole">Perfil</span>
+          </span>
+          <button class="btn btn--sm btn--secondary" id="logoutBtn">Sair</button>
+        </div>
+      </header>
+
+      <!-- Pages Container -->
+      <div id="pagesContainer">
+        <div class="page" style="text-align: center; padding: 3rem;">
+          <h2>🎉 Sistema Online!</h2>
+          <p>Faça login para acessar o sistema completo</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Bottom Navigation (Mobile) -->
+    <nav class="bottom-nav" id="bottomNav" style="display: none;">
+      <button class="nav-item active" data-page="dashboard">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Dashboard</span>
+      </button>
+      <button class="nav-item" data-page="clientes">
+        <span class="nav-icon">👥</span>
+        <span class="nav-label">Clientes</span>
+      </button>
+      <button class="nav-item" data-page="emprestimos">
+        <span class="nav-icon">💳</span>
+        <span class="nav-label">Empréstimos</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Scripts do Sistema -->
+  <script src="utils.js"></script>
+  <script src="dashboard.js"></script>
+  <script src="clientes.js"></script>
+  <script src="emprestimos.js"></script>
+  <script src="historico.js"></script>
+  <script src="usuarios.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
