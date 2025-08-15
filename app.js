@@ -1,324 +1,256 @@
-// Sistema de Empréstimos - Arquivo Principal (app.js)
-// =====================================================
+// app.js
+
+// Configuração Supabase
+const SUPABASE_URL = 'https://SEU_PROJETO.supabase.co';
+const SUPABASE_ANON_KEY = 'SUA_CHAVE_ANON';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 class SistemaEmprestimos {
-    constructor() {
-        this.isAuthenticated = false;
-        this.currentUser = null;
-        this.currentPage = 'dashboard';
-        this.sidebarOpen = true;
-        this.zoomLevel = 1.0;
+  constructor() {
+    this.isAuthenticated = false;
+    this.currentUser = null;
+    this.currentPage = 'dashboard';
+    this.sidebarOpen = true;
+    this.zoomLevel = 1.0;
+    this.users = [];
+    this.clientes = [];
+    this.emprestimos = [];
+    this.historicoPagamentos = [];
+    this.init();
+  }
 
-        // Usuários padrão do sistema
-        this.users = [
-            {"id": "1", "username": "admin", "password": "123456", "name": "Administrador", "role": "admin", "gerenteId": null, "status": "ativo"},
-            {"id": "2", "username": "gerente", "password": "123456", "name": "Gerente Financeiro", "role": "manager", "gerenteId": null, "status": "ativo"},
-            {"id": "3", "username": "operador", "password": "123456", "name": "Operador", "role": "operator", "gerenteId": "2", "status": "ativo"}
-        ];
+  async init() {
+    await this.loadInitialData();
+    this.bindGlobalEvents();
+    this.showLogin();
+    this.setupResponsiveNavigation();
+  }
 
-        // Dados de exemplo (podem ser removidos em produção)
-        this.clientes = [
-            {"id": "1", "nome": "Maria Silva", "contato": "(11) 99999-1111", "endereco": "Rua das Flores, 123", "documento": "123.456.789-01", "dataNascimento": "1985-03-15", "foto": "", "observacoes": "Cliente preferencial", "status": "ativo", "responsavelId": "3"},
-            {"id": "2", "nome": "João Santos", "contato": "(11) 88888-2222", "endereco": "Av. Principal, 456", "documento": "987.654.321-02", "dataNascimento": "1990-08-22", "foto": "", "observacoes": "Novo cliente", "status": "ativo", "responsavelId": "3"},
-            {"id": "3", "nome": "Ana Costa", "contato": "(11) 77777-3333", "endereco": "Rua do Comércio, 789", "documento": "456.789.123-03", "dataNascimento": "1988-12-10", "foto": "", "observacoes": "Cliente antigo", "status": "ativo", "responsavelId": "2"}
-        ];
-
-        this.emprestimos = [
-            {"id": "emp1", "clienteId": "1", "valorPrincipal": 5000.00, "jurosPerc": 10.0, "dataInicio": "2024-01-15", "status": "ativo", "responsavelId": "3", "pagamentos": []},
-            {"id": "emp2", "clienteId": "2", "valorPrincipal": 3000.00, "jurosPerc": 8.0, "dataInicio": "2024-02-01", "status": "ativo", "responsavelId": "3", "pagamentos": []},
-            {"id": "emp3", "clienteId": "3", "valorPrincipal": 8000.00, "jurosPerc": 12.0, "dataInicio": "2024-01-01", "status": "ativo", "responsavelId": "2", "pagamentos": []}
-        ];
-
-        this.historicoPagamentos = [
-            {"id": "hist1", "clienteId": "1", "emprestimoId": "emp1", "valorPago": 500.00, "tipo": "juros", "dataPagamento": "2024-02-15", "responsavelId": "3"},
-            {"id": "hist2", "clienteId": "2", "emprestimoId": "emp2", "valorPago": 240.00, "tipo": "juros", "dataPagamento": "2024-03-01", "responsavelId": "3"},
-            {"id": "hist3", "clienteId": "3", "emprestimoId": "emp3", "valorPago": 960.00, "tipo": "juros", "dataPagamento": "2024-02-01", "responsavelId": "2"}
-        ];
-
-        this.init();
+  // Carrega dados iniciais de usuários
+  async loadInitialData() {
+    const { data: users } = await supabase.from('usuarios').select('*');
+    this.users = users || [];
+    if (!this.users.length) {
+      await this.createDefaultUsers();
     }
+  }
 
-    init() {
-        this.bindGlobalEvents();
-        this.showLogin();
-        this.setupResponsiveNavigation();
+  // Insere usuários padrão
+  async createDefaultUsers() {
+    const defaultUsers = [
+      { username:'admin',   password:'123456', name:'Administrador',      role:'admin',    gerente_id:null, status:'ativo' },
+      { username:'gerente', password:'123456', name:'Gerente Financeiro', role:'manager',  gerente_id:null, status:'ativo' },
+      { username:'operador',password:'123456', name:'Operador',           role:'operator', gerente_id:null, status:'ativo' }
+    ];
+    await supabase.from('usuarios').insert(defaultUsers);
+    const { data: mgr } = await supabase.from('usuarios').select('id').eq('username','gerente').single();
+    await supabase.from('usuarios').update({ gerente_id: mgr.id }).eq('username','operador');
+    const { data } = await supabase.from('usuarios').select('*');
+    this.users = data || [];
+  }
+
+  // Login usando Supabase
+  async login(username, password) {
+    const { data } = await supabase
+      .from('usuarios')
+      .select('*')
+      .eq('username', username)
+      .eq('password', password)
+      .eq('status', 'ativo');
+    if (data.length) {
+      this.isAuthenticated = true;
+      this.currentUser = data[0];
+      return true;
     }
+    return false;
+  }
 
-    // ========== AUTENTICAÇÃO ==========
-    showLogin() {
-        document.getElementById('loginContainer').classList.remove('hidden');
-        document.getElementById('appContainer').classList.add('hidden');
+  // Carrega clientes do Supabase
+  async loadClientes() {
+    const { data } = await supabase
+      .from('clientes')
+      .select('*')
+      .order('created_at', { ascending: false });
+    this.clientes = data || [];
+  }
+
+  // Carrega empréstimos do Supabase
+  async loadEmprestimos() {
+    const { data } = await supabase
+      .from('emprestimos')
+      .select('*')
+      .order('created_at', { ascending: false });
+    this.emprestimos = data || [];
+  }
+
+  // Carrega histórico de pagamentos do Supabase
+  async loadHistorico() {
+    const { data } = await supabase
+      .from('historico_pagamentos')
+      .select('*')
+      .order('created_at', { ascending: false });
+    this.historicoPagamentos = data || [];
+  }
+
+  // Adiciona cliente e recarrega lista
+  async addCliente(clienteData) {
+    await supabase.from('clientes').insert([{
+      ...clienteData,
+      responsavel_id: this.currentUser.id,
+      status: 'ativo'
+    }]);
+    await this.loadClientes();
+  }
+
+  // Adiciona empréstimo e recarrega listas
+  async addEmprestimo(data) {
+    await supabase.from('emprestimos').insert([{
+      ...data,
+      responsavel_id: this.currentUser.id,
+      status: 'ativo'
+    }]);
+    await this.loadEmprestimos();
+  }
+
+  // Adiciona pagamento e recarrega histórico e, se for quitação, atualiza status
+  async addPagamento(empId, pagamento) {
+    await supabase.from('historico_pagamentos').insert([{
+      ...pagamento,
+      emprestimo_id: empId,
+      cliente_id: pagamento.clienteId,
+      responsavel_id: this.currentUser.id
+    }]);
+    if (pagamento.tipo === 'quitacao') {
+      await supabase
+        .from('emprestimos')
+        .update({ status: 'quitado' })
+        .eq('id', empId);
+      await this.loadEmprestimos();
     }
+    await this.loadHistorico();
+  }
 
-    showApp() {
-        document.getElementById('loginContainer').classList.add('hidden');
-        document.getElementById('appContainer').classList.remove('hidden');
-        this.updateUserInfo();
-        this.applyRolePermissions();
-        this.showPage(this.currentPage);
-    }
+  // Renderiza login
+  showLogin() {
+    document.getElementById('loginContainer').classList.remove('hidden');
+    document.getElementById('appContainer').classList.add('hidden');
+  }
 
-    login(username, password) {
-        const user = this.users.find(u => u.username === username && u.password === password && u.status === 'ativo');
-        if (user) {
-            this.isAuthenticated = true;
-            this.currentUser = user;
-            return true;
-        }
-        return false;
-    }
+  // Renderiza aplicação após login
+  showApp() {
+    document.getElementById('loginContainer').classList.add('hidden');
+    document.getElementById('appContainer').classList.remove('hidden');
+    this.updateUserInfo();
+    this.applyRolePermissions();
+    this.showPage(this.currentPage);
+  }
 
-    logout() {
-        this.isAuthenticated = false;
-        this.currentUser = null;
-        // Limpar gráficos se existirem
-        if (window.timelineChartInstance) {
-            window.timelineChartInstance.destroy();
-            window.timelineChartInstance = null;
-        }
-        document.body.className = '';
-        this.showLogin();
-    }
+  // Atualiza informações do usuário no header
+  updateUserInfo() {
+    document.getElementById('userName').textContent = this.currentUser.name;
+    const roleNames = { admin:'Administrador', manager:'Gerente', operator:'Operador' };
+    document.getElementById('userRole').textContent = roleNames[this.currentUser.role];
+  }
 
-    updateUserInfo() {
-        document.getElementById('userName').textContent = this.currentUser.name;
-        const roleNames = {
-            'admin': 'Administrador',
-            'manager': 'Gerente',
-            'operator': 'Operador'
-        };
-        document.getElementById('userRole').textContent = roleNames[this.currentUser.role];
-    }
+  // Aplica permissões por role
+  applyRolePermissions() {
+    document.body.classList.remove('role-admin','role-manager','role-operator');
+    document.body.classList.add(`role-${this.currentUser.role}`);
+    document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hidden', this.currentUser.role!=='admin'));
+    document.querySelectorAll('.manager-only').forEach(el => el.classList.toggle('hidden', !['admin','manager'].includes(this.currentUser.role)));
+    document.querySelectorAll('.operator-only').forEach(el => el.classList.toggle('hidden', this.currentUser.role!=='operator'));
+  }
 
-    applyRolePermissions() {
-        document.body.classList.remove('role-admin', 'role-manager', 'role-operator');
-        document.body.classList.add(`role-${this.currentUser.role}`);
+  // Navegação assíncrona entre páginas
+  async showPage(pageId) {
+    this.currentPage = pageId;
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    document.querySelectorAll(`[data-page="${pageId}"]`).forEach(item => item.classList.add('active'));
+    document.getElementById('pageTitle').textContent = {
+      dashboard:'Dashboard Financeiro',
+      cadastro:'Cadastro de Clientes',
+      emprestimos:'Tabela de Empréstimos',
+      historico:'Histórico de Pagamentos',
+      usuarios:'Gerenciar Usuários'
+    }[pageId] || '';
+    const container = document.getElementById('pagesContainer');
+    container.innerHTML = '';
 
-        const adminElements = document.querySelectorAll('.admin-only');
-        const managerElements = document.querySelectorAll('.manager-only');
-        const operatorElements = document.querySelectorAll('.operator-only');
+    switch(pageId) {
+      case 'dashboard':
+        DashboardModule.render(container);
+        DashboardModule.loadData();
+        break;
 
-        adminElements.forEach(el => el.classList.add('hidden'));
-        managerElements.forEach(el => el.classList.add('hidden'));
-        operatorElements.forEach(el => el.classList.add('hidden'));
+      case 'cadastro':
+        await this.loadClientes();
+        ClientesModule.render(container);
+        ClientesModule.loadData();
+        break;
 
-        if (this.currentUser.role === 'admin') {
-            adminElements.forEach(el => el.classList.remove('hidden'));
-            managerElements.forEach(el => el.classList.remove('hidden'));
-        } else if (this.currentUser.role === 'manager') {
-            managerElements.forEach(el => el.classList.remove('hidden'));
-        } else if (this.currentUser.role === 'operator') {
-            operatorElements.forEach(el => el.classList.remove('hidden'));
-        }
-    }
+      case 'emprestimos':
+        await this.loadEmprestimos();
+        EmprestimosModule.render(container);
+        EmprestimosModule.loadData();
+        break;
 
-    // ========== NAVEGAÇÃO ==========
-    showPage(pageId) {
-        this.currentPage = pageId;
+      case 'historico':
+        await this.loadHistorico();
+        HistoricoModule.render(container);
+        HistoricoModule.loadData();
+        break;
 
-        // Atualizar botões ativos
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.classList.remove('active');
-        });
-        document.querySelectorAll(`[data-page="${pageId}"]`).forEach(item => {
-            item.classList.add('active');
-        });
-
-        const titles = {
-            'dashboard': 'Dashboard Financeiro',
-            'cadastro': 'Cadastro de Clientes',
-            'emprestimos': 'Tabela de Empréstimos',
-            'historico': 'Histórico de Pagamentos',
-            'usuarios': 'Gerenciar Usuários'
-        };
-
-        document.getElementById('pageTitle').textContent = titles[pageId];
-
-        // Limpar container e carregar página específica
-        const container = document.getElementById('pagesContainer');
-        container.innerHTML = '';
-
-        // Carregar conteúdo da página
-        switch(pageId) {
-            case 'dashboard':
-                if (typeof DashboardModule !== 'undefined') {
-                    DashboardModule.render(container);
-                    DashboardModule.loadData();
-                }
-                break;
-            case 'cadastro':
-                if (typeof ClientesModule !== 'undefined') {
-                    ClientesModule.render(container);
-                    ClientesModule.loadData();
-                }
-                break;
-            case 'emprestimos':
-                if (typeof EmprestimosModule !== 'undefined') {
-                    EmprestimosModule.render(container);
-                    EmprestimosModule.loadData();
-                }
-                break;
-            case 'historico':
-                if (typeof HistoricoModule !== 'undefined') {
-                    HistoricoModule.render(container);
-                    HistoricoModule.loadData();
-                }
-                break;
-            case 'usuarios':
-                if (typeof UsuariosModule !== 'undefined' && this.currentUser.role === 'admin') {
-                    UsuariosModule.render(container);
-                    UsuariosModule.loadData();
-                } else {
-                    container.innerHTML = '<div class="page"><p>Acesso negado</p></div>';
-                }
-                break;
-        }
-    }
-
-    toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const mainContent = document.querySelector('.main-content');
-
-        if (window.innerWidth <= 768) {
-            sidebar.classList.toggle('open');
+      case 'usuarios':
+        if (this.currentUser.role==='admin') {
+          UsuariosModule.render(container);
+          UsuariosModule.loadData();
         } else {
-            this.sidebarOpen = !this.sidebarOpen;
-            if (this.sidebarOpen) {
-                sidebar.classList.remove('collapsed');
-                mainContent.classList.remove('sidebar-collapsed');
-            } else {
-                sidebar.classList.add('collapsed');
-                mainContent.classList.add('sidebar-collapsed');
-            }
+          container.innerHTML = '<div class="no-access"><h3>Acesso negado</h3></div>';
         }
+        break;
     }
 
-    setupResponsiveNavigation() {
-        const sidebar = document.getElementById('sidebar');
-        const bottomNav = document.getElementById('bottomNav');
+    if (window.innerWidth <= 768) this.closeSidebar();
+  }
 
-        if (window.innerWidth <= 768) {
-            sidebar.classList.remove('collapsed', 'open');
-            bottomNav.style.display = 'flex';
-        } else {
-            bottomNav.style.display = 'none';
-            sidebar.classList.remove('open');
-            if (!this.sidebarOpen) {
-                sidebar.classList.add('collapsed');
-            }
-        }
+  // Logout
+  logout() {
+    this.isAuthenticated = false;
+    this.currentUser = null;
+    document.body.className = '';
+    this.showLogin();
+  }
+
+  // Eventos globais e teclado
+  bindGlobalEvents() {
+    document.addEventListener('keydown', e => {
+      if (e.altKey) {
+        { '1':()=>'dashboard','2':()=>'cadastro','3':()=>'emprestimos','4':()=>'historico','5':()=>'usuarios' }[e.key]?.call(this) && this.showPage({ '1':'dashboard','2':'cadastro','3':'emprestimos','4':'historico','5':'usuarios' }[e.key]);
+      }
+    });
+  }
+
+  // Sidebar responsivo
+  toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const main = document.querySelector('.main-content');
+    if (window.innerWidth>768) {
+      sidebar.classList.toggle('collapsed');
+      main.classList.toggle('sidebar-collapsed');
+    } else {
+      sidebar.classList.toggle('open');
     }
-
-    // ========== PERMISSÕES ==========
-    canViewClient(clienteId) {
-        if (this.currentUser.role === 'admin') return true;
-        
-        const cliente = this.clientes.find(c => c.id === clienteId);
-        if (!cliente) return false;
-        
-        if (this.currentUser.role === 'manager') {
-            if (cliente.responsavelId === this.currentUser.id) return true;
-            const responsavel = this.users.find(u => u.id === cliente.responsavelId);
-            return responsavel && responsavel.gerenteId === this.currentUser.id;
-        }
-        
-        if (this.currentUser.role === 'operator') {
-            return cliente.responsavelId === this.currentUser.id;
-        }
-        
-        return false;
-    }
-
-    canEditClient(clienteId) {
-        if (this.currentUser.role === 'admin') return true;
-        const cliente = this.clientes.find(c => c.id === clienteId);
-        if (!cliente) return false;
-        return cliente.responsavelId === this.currentUser.id;
-    }
-
-    getFilteredClientes() {
-        return this.clientes.filter(cliente => this.canViewClient(cliente.id));
-    }
-
-    getFilteredEmprestimos() {
-        return this.emprestimos.filter(emp => {
-            const cliente = this.clientes.find(c => c.id === emp.clienteId);
-            return cliente && this.canViewClient(cliente.id);
-        });
-    }
-
-    getFilteredHistorico() {
-        return this.historicoPagamentos.filter(hist => {
-            const cliente = this.clientes.find(c => c.id === hist.clienteId);
-            return cliente && this.canViewClient(cliente.id);
-        });
-    }
-
-    // ========== EVENTOS GLOBAIS ==========
-    bindGlobalEvents() {
-        // Login
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const username = document.getElementById('loginUsuario').value.trim();
-            const password = document.getElementById('loginSenha').value.trim();
-            const loginBtn = document.getElementById('loginBtn');
-            const loginError = document.getElementById('loginError');
-
-            loginBtn.querySelector('.login-btn-text').classList.add('hidden');
-            loginBtn.querySelector('.login-btn-loading').classList.remove('hidden');
-            loginBtn.disabled = true;
-
-            setTimeout(() => {
-                if (this.login(username, password)) {
-                    this.showApp();
-                } else {
-                    loginError.classList.remove('hidden');
-                }
-
-                loginBtn.querySelector('.login-btn-text').classList.remove('hidden');
-                loginBtn.querySelector('.login-btn-loading').classList.add('hidden');
-                loginBtn.disabled = false;
-            }, 1000);
-        });
-
-        // Logout
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            this.logout();
-        });
-
-        // Navegação
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', () => {
-                const page = item.getAttribute('data-page');
-                this.showPage(page);
-                
-                // Fechar sidebar mobile
-                if (window.innerWidth <= 768) {
-                    document.getElementById('sidebar').classList.remove('open');
-                }
-            });
-        });
-
-        // Toggle sidebar
-        document.getElementById('sidebarToggle').addEventListener('click', () => {
-            this.toggleSidebar();
-        });
-
-        // Responsividade
-        window.addEventListener('resize', () => {
-            this.setupResponsiveNavigation();
-        });
-
-        // Fechar modal clicando fora
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal')) {
-                e.target.classList.add('hidden');
-            }
-        });
-    }
+  }
+  closeSidebar() {
+    if (window.innerWidth<=768) document.getElementById('sidebar').classList.remove('open');
+  }
+  setupResponsiveNavigation() {
+    document.addEventListener('click', e => { if (window.innerWidth<=768 && !document.getElementById('sidebar').contains(e.target) && document.getElementById('sidebar').classList.contains('open')) this.closeSidebar(); });
+    window.addEventListener('resize', () => { if (window.innerWidth>768) document.getElementById('sidebar').classList.remove('open'); });
+  }
 }
 
-// Inicializar sistema quando DOM carregado
-document.addEventListener('DOMContentLoaded', () => {
-    window.sistema = new SistemaEmprestimos();
+// Inicialização na carga da página
+window.addEventListener('DOMContentLoaded', () => {
+  window.sistema = new SistemaEmprestimos();
 });
