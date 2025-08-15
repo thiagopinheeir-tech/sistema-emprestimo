@@ -3,7 +3,7 @@
 // Carrega variáveis de ambiente definidas em env.js
 const SUPABASE_URL     = window.process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = window.process.env.SUPABASE_ANON_KEY;
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 class SistemaEmprestimos {
   constructor() {
@@ -43,7 +43,11 @@ class SistemaEmprestimos {
       { username: 'operador', password: '123456', name: 'Operador',           role: 'operator', gerente_id: null, status: 'ativo' }
     ];
     await supabase.from('usuarios').insert(defaultUsers);
-    const { data: mgr } = await supabase.from('usuarios').select('id').eq('username', 'gerente').single();
+    const { data: mgr } = await supabase
+      .from('usuarios')
+      .select('id')
+      .eq('username', 'gerente')
+      .single();
     await supabase.from('usuarios').update({ gerente_id: mgr.id }).eq('username', 'operador');
     const { data } = await supabase.from('usuarios').select('*');
     this.users = data || [];
