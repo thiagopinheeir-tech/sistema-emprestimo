@@ -1,12 +1,14 @@
 // app.js
 
 // Carrega variáveis de ambiente definidas em env.js
-const SUPABASE_URL     = window.process.env.SUPABASE_URL;
+const SUPABASE_URL      = window.process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = window.process.env.SUPABASE_ANON_KEY;
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Usa window.supabase do CDN para criar o cliente
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 class SistemaEmprestimos {
   constructor() {
+    this.supabase = supabaseClient;
     this.isAuthenticated = false;
     this.currentUser = null;
     this.currentPage = 'dashboard';
@@ -26,36 +28,33 @@ class SistemaEmprestimos {
     this.setupResponsiveNavigation();
   }
 
-  // Carrega usuários iniciais do Supabase
+  // Carrega usuários iniciais
   async loadInitialData() {
-    const { data: users } = await supabase.from('usuarios').select('*');
+    const { data: users } = await this.supabase.from('usuarios').select('*');
     this.users = users || [];
     if (!this.users.length) {
       await this.createDefaultUsers();
     }
   }
 
-  // Insere usuários padrão
+  // Cria usuários padrão
   async createDefaultUsers() {
     const defaultUsers = [
       { username: 'admin',    password: '123456', name: 'Administrador',      role: 'admin',    gerente_id: null, status: 'ativo' },
       { username: 'gerente',  password: '123456', name: 'Gerente Financeiro', role: 'manager',  gerente_id: null, status: 'ativo' },
       { username: 'operador', password: '123456', name: 'Operador',           role: 'operator', gerente_id: null, status: 'ativo' }
     ];
-    await supabase.from('usuarios').insert(defaultUsers);
-    const { data: mgr } = await supabase
-      .from('usuarios')
-      .select('id')
-      .eq('username', 'gerente')
-      .single();
-    await supabase.from('usuarios').update({ gerente_id: mgr.id }).eq('username', 'operador');
-    const { data } = await supabase.from('usuarios').select('*');
+    await this.supabase.from('usuarios').insert(defaultUsers);
+    const { data: mgr } = await this.supabase
+      .from('usuarios').select('id').eq('username', 'gerente').single();
+    await this.supabase.from('usuarios').update({ gerente_id: mgr.id }).eq('username', 'operador');
+    const { data } = await this.supabase.from('usuarios').select('*');
     this.users = data || [];
   }
 
-  // Autenticação de usuário
+  // Login
   async login(username, password) {
-    const { data } = await supabase
+    const { data } = await this.supabase
       .from('usuarios')
       .select('*')
       .eq('username', username)
@@ -79,34 +78,31 @@ class SistemaEmprestimos {
 
   // Carrega clientes
   async loadClientes() {
-    const { data } = await supabase
-      .from('clientes')
-      .select('*')
+    const { data } = await this.supabase
+      .from('clientes').select('*')
       .order('created_at', { ascending: false });
     this.clientes = data || [];
   }
 
   // Carrega empréstimos
   async loadEmprestimos() {
-    const { data } = await supabase
-      .from('emprestimos')
-      .select('*')
+    const { data } = await this.supabase
+      .from('emprestimos').select('*')
       .order('created_at', { ascending: false });
     this.emprestimos = data || [];
   }
 
-  // Carrega histórico de pagamentos
+  // Carrega histórico
   async loadHistorico() {
-    const { data } = await supabase
-      .from('historico_pagamentos')
-      .select('*')
+    const { data } = await this.supabase
+      .from('historico_pagamentos').select('*')
       .order('created_at', { ascending: false });
     this.historicoPagamentos = data || [];
   }
 
-  // Adiciona cliente e recarrega lista
+  // Insere cliente
   async addCliente(clienteData) {
-    await supabase.from('clientes').insert([{
+    await this.supabase.from('clientes').insert([{
       ...clienteData,
       responsavel_id: this.currentUser.id,
       status: 'ativo'
@@ -114,9 +110,9 @@ class SistemaEmprestimos {
     await this.loadClientes();
   }
 
-  // Adiciona empréstimo e recarrega lista
+  // Insere empréstimo
   async addEmprestimo(data) {
-    await supabase.from('emprestimos').insert([{
+    await this.supabase.from('emprestimos').insert([{
       ...data,
       responsavel_id: this.currentUser.id,
       status: 'ativo'
@@ -124,16 +120,16 @@ class SistemaEmprestimos {
     await this.loadEmprestimos();
   }
 
-  // Adiciona pagamento e recarrega histórico. Se for quitação, atualiza empréstimo
+  // Insere pagamento e atualiza status se quitação
   async addPagamento(empId, pagamento) {
-    await supabase.from('historico_pagamentos').insert([{
+    await this.supabase.from('historico_pagamentos').insert([{
       ...pagamento,
       emprestimo_id: empId,
       cliente_id: pagamento.clienteId,
       responsavel_id: this.currentUser.id
     }]);
     if (pagamento.tipo === 'quitacao') {
-      await supabase
+      await this.supabase
         .from('emprestimos')
         .update({ status: 'quitado' })
         .eq('id', empId);
@@ -142,13 +138,13 @@ class SistemaEmprestimos {
     await this.loadHistorico();
   }
 
-  // Exibe tela de login
+  // Exibe login
   showLogin() {
     document.getElementById('loginContainer').classList.remove('hidden');
     document.getElementById('appContainer').classList.add('hidden');
   }
 
-  // Exibe aplicativo após login
+  // Exibe app
   showApp() {
     document.getElementById('loginContainer').classList.add('hidden');
     document.getElementById('appContainer').classList.remove('hidden');
@@ -157,14 +153,14 @@ class SistemaEmprestimos {
     this.showPage(this.currentPage);
   }
 
-  // Atualiza cabeçalho com info do usuário
+  // Atualiza header
   updateUserInfo() {
     document.getElementById('userName').textContent = this.currentUser.name;
     const roleNames = { admin: 'Administrador', manager: 'Gerente', operator: 'Operador' };
     document.getElementById('userRole').textContent = roleNames[this.currentUser.role];
   }
 
-  // Exibe/oculta menus conforme permissão
+  // Permissões
   applyRolePermissions() {
     document.body.classList.remove('role-admin', 'role-manager', 'role-operator');
     document.body.classList.add(`role-${this.currentUser.role}`);
@@ -176,7 +172,7 @@ class SistemaEmprestimos {
       .forEach(el => el.classList.toggle('hidden', this.currentUser.role !== 'operator'));
   }
 
-  // Navegação assíncrona entre páginas
+  // Paginação
   async showPage(pageId) {
     this.currentPage = pageId;
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
@@ -229,7 +225,7 @@ class SistemaEmprestimos {
     if (window.innerWidth <= 768) this.closeSidebar();
   }
 
-  // Eventos globais de teclado (atalhos Alt+1..5)
+  // Atalhos teclado
   bindGlobalEvents() {
     document.addEventListener('keydown', async e => {
       if (!e.altKey) return;
@@ -243,7 +239,7 @@ class SistemaEmprestimos {
     });
   }
 
-  // Controle da sidebar responsiva
+  // Sidebar
   toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const main = document.querySelector('.main-content');

@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sistema de Empréstimos</title>
   <link rel="stylesheet" href="style.css"/>
-  <link rel="stylesheet" href="style-custom.css"/>
+  <!-- Se quiser customizações extras, crie style-custom.css e descomente abaixo -->
+  <!-- <link rel="stylesheet" href="style-custom.css"/> -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -51,7 +52,7 @@
           <h2 id="pageTitle">Dashboard Financeiro</h2>
         </div>
         <div class="user-info">
-          <span id="userName"></span> (<span id="userRole"></span>) 
+          <span id="userName"></span> (<span id="userRole"></span>)
           <button onclick="sistema.logout()">Sair</button>
         </div>
       </header>
@@ -59,6 +60,7 @@
     </main>
   </div>
 
+  <!-- Módulos do sistema -->
   <script src="utils.js"></script>
   <script src="dashboard.js"></script>
   <script src="clientes.js"></script>
@@ -66,10 +68,12 @@
   <script src="historico.js"></script>
   <script src="usuarios.js"></script>
 
+  <!-- Configuração Supabase e lógica principal -->
   <script src="env.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
 
+  <!-- Inicialização -->
   <script>
     window.addEventListener('DOMContentLoaded', () => {
       window.sistema = new SistemaEmprestimos();
