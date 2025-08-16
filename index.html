@@ -5,28 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Sistema de Empréstimos</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- Biblioteca Supabase JS -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+  
+  <!-- SUPABASE - Versão mais estável -->
+  <script src="https://unpkg.com/@supabase/supabase-js@1"></script>
+  
   <!-- Configuração do Supabase -->
   <script src="env.js"></script>
+  
   <!-- Chart.js para gráficos -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 </head>
 <body>
-  <div id="loginContainer" class="hidden">
-    <div class="login-card">
-      <h1>Sistema de Empréstimos</h1>
-      <form id="loginForm">
-        <label for="username">Usuário</label>
-        <input type="text" id="username" name="username" required />
-        <label for="password">Senha</label>
-        <input type="password" id="password" name="password" required />
-        <button type="submit" class="btn btn--primary">Entrar</button>
-      </form>
-      <p id="loginError" style="display:none;color:var(--color-error)">Credenciais inválidas</p>
-    </div>
-  </div>
-  <div id="appContainer" class="hidden">
+  <div class="page-wrapper">
     <aside class="sidebar">
       <header class="sidebar-header">Sistema de Empréstimos</header>
       <nav class="sidebar-nav">
@@ -38,27 +28,46 @@
       </nav>
       <button class="sidebar-toggle">☰</button>
     </aside>
-    <main class="main-content">
-      <header class="header">
-        <h1 id="pageTitle" class="page-title"></h1>
-        <div class="header-user">
-          <div id="userName"></div>
-          <div id="userRole" class="user-role"></div>
-          <button id="btnLogout" class="btn btn--danger">Sair</button>
+
+    <div class="main-wrapper">
+      <!-- Tela de Login -->
+      <div id="loginContainer" class="hidden">
+        <div class="login-card">
+          <h1>Sistema de Empréstimos</h1>
+          <form id="loginForm">
+            <label for="username">Usuário</label>
+            <input type="text" id="username" name="username" required />
+            <label for="password">Senha</label>
+            <input type="password" id="password" name="password" required />
+            <button type="submit" class="btn btn--primary">Entrar</button>
+          </form>
+          <p id="loginError">Credenciais inválidas</p>
         </div>
-      </header>
-      <section id="pagesContainer" class="page-container"></section>
-    </main>
-    <nav class="bottom-nav">
-      <button class="nav-item" data-page="dashboard">🏠 Dashboard</button>
-      <button class="nav-item" data-page="cadastro">👥 Clientes</button>
-      <button class="nav-item" data-page="emprestimos">💰 Empréstimos</button>
-      <button class="nav-item" data-page="historico">📜 Histórico</button>
-      <button class="nav-item admin-only" data-page="usuarios" style="display:none;">⚙ Usuários</button>
-    </nav>
+      </div>
+
+      <!-- App -->
+      <div id="appContainer" class="hidden">
+        <header class="header">
+          <h1 id="pageTitle" class="page-title"></h1>
+          <div class="header-user">
+            <div id="userName"></div>
+            <div id="userRole" class="user-role"></div>
+            <button id="btnLogout" class="btn btn--danger">Sair</button>
+          </div>
+        </header>
+        <section id="pagesContainer" class="page-container"></section>
+        <nav class="bottom-nav">
+          <button class="nav-item" data-page="dashboard">🏠 Dashboard</button>
+          <button class="nav-item" data-page="cadastro">👥 Clientes</button>
+          <button class="nav-item" data-page="emprestimos">💰 Empréstimos</button>
+          <button class="nav-item" data-page="historico">📜 Histórico</button>
+          <button class="nav-item admin-only" data-page="usuarios" style="display:none;">⚙ Usuários</button>
+        </nav>
+      </div>
+    </div>
   </div>
 
-  <!-- Scripts na ORDEM EXATA - SEM DEFER -->
+  <!-- Scripts na ORDEM EXATA -->
   <script src="utils.js"></script>
   <script src="app.js"></script>
   <script src="dashboard.js"></script>
@@ -88,6 +97,7 @@
         }
       }
     });
+
     // Formulário de login
     document.getElementById('loginForm').addEventListener('submit', async e => {
       e.preventDefault();
