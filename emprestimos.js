@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // Módulo Empréstimos
 // ==================
 
@@ -15,6 +16,18 @@ const EmprestimosModule = {
       </div>
 
       <div class="table-container">
+=======
+// emprestimos.js
+
+const EmprestimosModule = {
+  render(container) {
+    container.innerHTML = `
+      <section class="page-header">
+        <h2>Empréstimos</h2>
+        <button class="btn btn--primary" id="addEmprestimoBtn">Novo Empréstimo</button>
+      </section>
+      <section class="table-container">
+>>>>>>> 3d9d87908cfcf02c68054e3ac557608d4a425c20
         <table class="table" id="emprestimosTable">
           <thead>
             <tr>
@@ -33,9 +46,14 @@ const EmprestimosModule = {
             <tr><td colspan="9">Carregando empréstimos...</td></tr>
           </tbody>
         </table>
+<<<<<<< HEAD
       </div>
 
       <!-- Modal de Cadastro/Edição -->
+=======
+      </section>
+
+>>>>>>> 3d9d87908cfcf02c68054e3ac557608d4a425c20
       <div id="emprestimoFormModal" class="modal hidden">
         <div class="modal-content">
           <div class="modal-header">
@@ -44,6 +62,7 @@ const EmprestimosModule = {
           </div>
           <div class="modal-body">
             <form id="emprestimoForm">
+<<<<<<< HEAD
               <div class="form-row">
                 <div class="form-group">
                   <label class="form-label" for="clienteId">Cliente *</label>
@@ -117,12 +136,36 @@ const EmprestimosModule = {
                 <button type="button" class="btn btn--secondary" onclick="EmprestimosModule.closePagamentoModal()">Cancelar</button>
                 <button type="submit" class="btn btn--success">Registrar Pagamento</button>
               </div>
+=======
+              <div class="form-group">
+                <label for="clienteId">Cliente</label>
+                <select id="clienteId" name="clienteId" class="form-control" required>
+                  <option value="">Selecione...</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="valorPrincipal">Valor Principal</label>
+                <input type="number" id="valorPrincipal" name="valorPrincipal" class="form-control" min="1" required />
+              </div>
+              <div class="form-group">
+                <label for="jurosPerc">Juros (%)</label>
+                <input type="number" id="jurosPerc" name="jurosPerc" class="form-control" min="0" required />
+              </div>
+              <div class="form-group">
+                <label for="dataInicio">Data de Início</label>
+                <input type="date" id="dataInicio" name="dataInicio" class="form-control" required />
+              </div>
+              <button type="submit" class="btn btn--primary btn--full-width">Salvar</button>
+>>>>>>> 3d9d87908cfcf02c68054e3ac557608d4a425c20
             </form>
           </div>
         </div>
       </div>
     `;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 3d9d87908cfcf02c68054e3ac557608d4a425c20
     this.bindEvents();
     this.populateClientesSelect();
   },
@@ -131,6 +174,7 @@ const EmprestimosModule = {
     document.getElementById('addEmprestimoBtn').addEventListener('click', () => this.openForm());
     document.getElementById('closeEmprestimoModalBtn').addEventListener('click', () => this.closeForm());
     document.getElementById('emprestimoForm').addEventListener('submit', e => this.onSubmit(e));
+<<<<<<< HEAD
     document.getElementById('pagamentoForm').addEventListener('submit', e => this.onPagamentoSubmit(e));
 
     // Atualizar data de início para hoje por padrão
@@ -157,12 +201,21 @@ const EmprestimosModule = {
 
     this.populateClientesSelect();
     Utils.toggleModal('emprestimoFormModal', true);
+=======
+  },
+
+  openForm() {
+    document.getElementById('emprestimoForm').reset();
+    Utils.toggleModal('emprestimoFormModal', true);
+    this.populateClientesSelect();
+>>>>>>> 3d9d87908cfcf02c68054e3ac557608d4a425c20
   },
 
   closeForm() {
     Utils.toggleModal('emprestimoFormModal', false);
   },
 
+<<<<<<< HEAD
   openPagamentoModal(emprestimoId) {
     const emprestimo = sistema.emprestimos.find(e => e.id === emprestimoId);
     if (!emprestimo) {
@@ -248,10 +301,21 @@ const EmprestimosModule = {
     const dataPagamento = document.getElementById('dataPagamento').value;
 
     if (!emprestimoId || !clienteId || !tipoPagamento || isNaN(valorPagamento) || !dataPagamento) {
+=======
+  async onSubmit(event) {
+    event.preventDefault();
+    const clienteId    = document.getElementById('clienteId').value;
+    const valorPrincipal = parseFloat(document.getElementById('valorPrincipal').value);
+    const jurosPerc    = parseFloat(document.getElementById('jurosPerc').value);
+    const dataInicio   = document.getElementById('dataInicio').value;
+
+    if (!clienteId || isNaN(valorPrincipal) || isNaN(jurosPerc) || !dataInicio) {
+>>>>>>> 3d9d87908cfcf02c68054e3ac557608d4a425c20
       Utils.alert('Todos os campos são obrigatórios!', 'error');
       return;
     }
 
+<<<<<<< HEAD
     try {
       // Registrar pagamento no histórico
       await sistema.addHistoricoPagamento({
@@ -280,11 +344,27 @@ const EmprestimosModule = {
       console.error('Erro ao registrar pagamento:', error);
       Utils.alert('Erro ao registrar pagamento. Tente novamente.', 'error');
     }
+=======
+    await sistema.supabase.from('emprestimos').insert([{
+      clienteId,
+      valorPrincipal,
+      jurosPerc,
+      dataInicio,
+      status: "ativo",
+      responsavel_id: sistema.currentUser.id
+    }]);
+
+    await sistema.loadEmprestimos(); // Atualiza lista local
+    this.closeForm();
+    this.loadData();
+    Utils.alert('Empréstimo cadastrado com sucesso!', 'info');
+>>>>>>> 3d9d87908cfcf02c68054e3ac557608d4a425c20
   },
 
   populateClientesSelect() {
     const select = document.getElementById('clienteId');
     if (!select) return;
+<<<<<<< HEAD
 
     select.innerHTML = '<option value="">Selecione um cliente...</option>';
     
@@ -298,10 +378,19 @@ const EmprestimosModule = {
     clientesDisponiveis.forEach(cliente => {
       select.innerHTML += `<option value="${cliente.id}">${cliente.nome}</option>`;
     });
+=======
+    select.innerHTML = '<option value="">Selecione...</option>';
+    if (sistema.clientes && sistema.clientes.length) {
+      sistema.clientes.forEach(cliente => {
+        select.innerHTML += `<option value="${cliente.id}">${cliente.nome}</option>`;
+      });
+    }
+>>>>>>> 3d9d87908cfcf02c68054e3ac557608d4a425c20
   },
 
   loadData() {
     const tbody = document.getElementById('emprestimosTable').querySelector('tbody');
+<<<<<<< HEAD
     const emprestimos = this.getFilteredEmprestimos();
 
     if (!emprestimos.length) {
@@ -354,10 +443,35 @@ const EmprestimosModule = {
                 </button>
               </div>
             ` : '-'}
+=======
+    if (!sistema.emprestimos.length) {
+      tbody.innerHTML = '<tr><td colspan="9">Nenhum empréstimo encontrado.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = sistema.emprestimos.map(emp => {
+      const cliente = sistema.clientes.find(c => c.id === emp.clienteId) || {};
+      const vencimento = Utils.calcularVencimento(emp.dataInicio);
+      const valorJuros = Utils.calcularJuros(emp.valorPrincipal, emp.jurosPerc);
+
+      return `
+        <tr>
+          <td><img src="${cliente.foto || 'https://via.placeholder.com/40'}" alt="${cliente.nome || ''}" width="40" height="40" style="border-radius:8px;" /></td>
+          <td>${cliente.nome || '-'}</td>
+          <td>${emp.dataInicio ? Utils.formatDateForInput(emp.dataInicio) : '-'}</td>
+          <td>${vencimento}</td>
+          <td>${Utils.formatCurrency(emp.valorPrincipal)}</td>
+          <td>${emp.jurosPerc || '0'}%</td>
+          <td>${Utils.formatCurrency(valorJuros)}</td>
+          <td><span class="status-badge status-${emp.status}">${emp.status.charAt(0).toUpperCase() + emp.status.slice(1)}</span></td>
+          <td>
+            <button class="btn btn--sm btn--outline" onclick="alert('Função editar empréstimo não implementada')">Editar</button>
+>>>>>>> 3d9d87908cfcf02c68054e3ac557608d4a425c20
           </td>
         </tr>
       `;
     }).join('');
+<<<<<<< HEAD
   },
 
   // Obter empréstimos filtrados por permissão
@@ -375,3 +489,7 @@ const EmprestimosModule = {
     return sistema.emprestimos.find(e => e.id === id);
   }
 };
+=======
+  }
+};
+>>>>>>> 3d9d87908cfcf02c68054e3ac557608d4a425c20
