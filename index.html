@@ -1,160 +1,106 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Sistema de Empréstimos</title>
-  <meta name="description" content="Sistema completo para gerenciamento de empréstimos, clientes e cobranças"/>
-  <link rel="stylesheet" href="style.css"/>
-  <!-- Chart.js e Supabase CDN -->
+  <link rel="stylesheet" href="style.css" />
+  <!-- Biblioteca Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+  <!-- Configuração do Supabase -->
+  <script src="env.js"></script>
+  <!-- Chart.js para gráficos -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 <body>
-  <!-- Tela Login -->
-  <div id="loginContainer" class="login-container">
+  <div id="loginContainer" class="hidden">
     <div class="login-card">
-      <div class="login-header">
-        <div class="app-icon">💰</div>
-        <h1 class="login-title">Sistema de Empréstimos</h1>
-        <p class="login-subtitle">Faça login para acessar o sistema</p>
-      </div>
-      <div id="loginError" class="login-error hidden"></div>
-      <form id="loginForm" autocomplete="off">
-        <div class="form-group">
-          <label class="form-label" for="username">Usuário</label>
-          <input type="text" id="username" name="username" class="form-control" required autocomplete="username" />
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="password">Senha</label>
-          <input type="password" id="password" name="password" class="form-control" required autocomplete="current-password" />
-        </div>
-        <button type="submit" class="btn btn--primary btn--full-width">Entrar no Sistema</button>
+      <h1>Sistema de Empréstimos</h1>
+      <form id="loginForm">
+        <label for="username">Usuário</label>
+        <input type="text" id="username" name="username" required />
+        <label for="password">Senha</label>
+        <input type="password" id="password" name="password" required />
+        <button type="submit" class="btn btn--primary">Entrar</button>
       </form>
-      <div class="login-info">
-        <small>
-          <strong>Usuários de teste:</strong><br>
-          👨‍💼 Admin: <code>admin / 123456</code><br>
-          👩‍💼 Gerente: <code>gerente / 123456</code><br>
-          👤 Operador: <code>operador / 123456</code>
-        </small>
-      </div>
+      <p id="loginError" style="display:none;color:var(--color-error)">Credenciais inválidas</p>
     </div>
   </div>
-
-  <!-- App Principal -->
-  <div id="appContainer" class="hidden app-container">
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-header">
-        <div class="sidebar-title">
-          <span class="app-icon">💰</span> Sistema de Empréstimos
-        </div>
-      </div>
+  <div id="appContainer" class="hidden">
+    <aside class="sidebar">
+      <header class="sidebar-header">Sistema de Empréstimos</header>
       <nav class="sidebar-nav">
-        <button class="nav-item" data-page="dashboard" onclick="sistema.showPage('dashboard');return false;">
-          <span class="nav-icon">📊</span><span class="nav-text">Dashboard</span>
-        </button>
-        <button class="nav-item" data-page="cadastro" onclick="sistema.showPage('cadastro');return false;">
-          <span class="nav-icon">👥</span><span class="nav-text">Clientes</span>
-        </button>
-        <button class="nav-item" data-page="emprestimos" onclick="sistema.showPage('emprestimos');return false;">
-          <span class="nav-icon">💰</span><span class="nav-text">Empréstimos</span>
-        </button>
-        <button class="nav-item" data-page="historico" onclick="sistema.showPage('historico');return false;">
-          <span class="nav-icon">📈</span><span class="nav-text">Histórico</span>
-        </button>
-        <button class="nav-item admin-only" data-page="usuarios" onclick="sistema.showPage('usuarios');return false;">
-          <span class="nav-icon">⚙️</span><span class="nav-text">Usuários</span>
-        </button>
+        <button class="nav-item" data-page="dashboard">Dashboard</button>
+        <button class="nav-item" data-page="cadastro">Clientes</button>
+        <button class="nav-item" data-page="emprestimos">Empréstimos</button>
+        <button class="nav-item" data-page="historico">Histórico</button>
+        <button class="nav-item admin-only" data-page="usuarios" style="display:none;">Usuários</button>
       </nav>
+      <button class="sidebar-toggle">☰</button>
     </aside>
     <main class="main-content">
       <header class="header">
-        <div class="flex">
-          <button class="sidebar-toggle" onclick="sistema.toggleSidebar()">☰</button>
-          <h2 class="page-title" id="pageTitle">Dashboard Financeiro</h2>
-        </div>
+        <h1 id="pageTitle" class="page-title"></h1>
         <div class="header-user">
-          <div class="user-info">
-            <span class="user-name" id="userName"></span>
-            <span class="user-role" id="userRole"></span>
-          </div>
-          <button class="btn btn--secondary btn--sm" onclick="sistema.logout()">🚪 <span>Sair</span></button>
+          <div id="userName"></div>
+          <div id="userRole" class="user-role"></div>
+          <button id="btnLogout" class="btn btn--danger">Sair</button>
         </div>
       </header>
-      <div class="page active" id="pagesContainer"></div>
+      <section id="pagesContainer" class="page-container"></section>
     </main>
+    <nav class="bottom-nav">
+      <button class="nav-item" data-page="dashboard">🏠 Dashboard</button>
+      <button class="nav-item" data-page="cadastro">👥 Clientes</button>
+      <button class="nav-item" data-page="emprestimos">💰 Empréstimos</button>
+      <button class="nav-item" data-page="historico">📜 Histórico</button>
+      <button class="nav-item admin-only" data-page="usuarios" style="display:none;">⚙ Usuários</button>
+    </nav>
   </div>
 
-  <!-- Bottom Navigation Mobile -->
-  <nav class="bottom-nav" id="bottomNav">
-    <button class="nav-item" data-page="dashboard" onclick="sistema.showPage('dashboard');return false;">
-      <span class="nav-icon">📊</span><span class="nav-label">Dashboard</span>
-    </button>
-    <button class="nav-item" data-page="cadastro" onclick="sistema.showPage('cadastro');return false;">
-      <span class="nav-icon">👥</span><span class="nav-label">Clientes</span>
-    </button>
-    <button class="nav-item" data-page="emprestimos" onclick="sistema.showPage('emprestimos');return false;">
-      <span class="nav-icon">💰</span><span class="nav-label">Empréstimos</span>
-    </button>
-    <button class="nav-item" data-page="historico" onclick="sistema.showPage('historico');return false;">
-      <span class="nav-icon">📈</span><span class="nav-label">Histórico</span>
-    </button>
-    <button class="nav-item admin-only" data-page="usuarios" onclick="sistema.showPage('usuarios');return false;">
-      <span class="nav-icon">⚙️</span><span class="nav-label">Usuários</span>
-    </button>
-  </nav>
-
-  <!-- Ordem dos Scripts: -->
-  <script src="env.js"></script>
+  <!-- Scripts na ORDEM EXATA - SEM DEFER -->
   <script src="utils.js"></script>
+  <script src="app.js"></script>
   <script src="dashboard.js"></script>
   <script src="clientes.js"></script>
   <script src="emprestimos.js"></script>
   <script src="historico.js"></script>
   <script src="usuarios.js"></script>
-  <script src="app.js"></script>
+  <script src="init.js"></script>
 
   <script>
-    // Inicialização do sistema
-    window.addEventListener('DOMContentLoaded', () => {
-      window.sistema = new SistemaEmprestimos();
-
-      document.getElementById('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const username = document.getElementById('username').value.trim();
-        const password = document.getElementById('password').value.trim();
-        const errorDiv = document.getElementById('loginError');
-
-        if (!username || !password) {
-          errorDiv.textContent = "Por favor, preencha usuário e senha.";
-          errorDiv.classList.remove('hidden');
-          return;
+    // Navegação lateral e inferior
+    document.addEventListener('click', event => {
+      const target = event.target;
+      if (target.classList.contains('nav-item')) {
+        if (window.sistema) {
+          window.sistema.showPage(target.dataset.page);
         }
-
-        // Estado de loading no botão
-        const submitBtn = e.target.querySelector('button[type="submit"]');
-        const origText = submitBtn.textContent;
-        submitBtn.textContent = 'Entrando...';
-        submitBtn.disabled = true;
-
-        try {
-          const success = await sistema.login(username, password);
-          if (success) {
-            errorDiv.classList.add('hidden');
-            sistema.showApp();
-          } else {
-            errorDiv.textContent = "Usuário ou senha incorretos.";
-            errorDiv.classList.remove('hidden');
-          }
-        } catch (error) {
-          errorDiv.textContent = "Erro ao fazer login.";
-          errorDiv.classList.remove('hidden');
-        } finally {
-          submitBtn.textContent = origText;
-          submitBtn.disabled = false;
+      }
+      if (target.id === 'btnLogout') {
+        if (window.sistema) {
+          window.sistema.logout();
         }
-      });
+      }
+      if (target.classList.contains('sidebar-toggle')) {
+        if (window.sistema) {
+          window.sistema.toggleSidebar();
+        }
+      }
+    });
+    // Formulário de login
+    document.getElementById('loginForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const username = e.target.username.value;
+      const password = e.target.password.value;
+      if (!window.sistema) return;
+      const success = await window.sistema.login(username, password);
+      if (success) {
+        window.sistema.showApp();
+        document.getElementById('loginError').style.display = 'none';
+      } else {
+        document.getElementById('loginError').style.display = 'block';
+      }
     });
   </script>
 </body>
