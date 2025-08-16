@@ -1,10 +1,6 @@
-// Módulo Clientes
-// ===============
-
 const ClientesModule = {
   editingClienteId: null,
 
-  // Renderizar HTML da página de clientes
   render(container) {
     container.innerHTML = `
       <div class="page-header">
@@ -33,7 +29,7 @@ const ClientesModule = {
         </table>
       </div>
 
-      <!-- Modal de Cadastro/Edição -->
+      <!-- Modal Cliente -->
       <div id="clienteFormModal" class="modal hidden">
         <div class="modal-content">
           <div class="modal-header">
@@ -44,42 +40,42 @@ const ClientesModule = {
             <form id="clienteForm">
               <div class="form-row">
                 <div class="form-group">
-                  <label class="form-label" for="nome">Nome Completo *</label>
+                  <label for="nome">Nome Completo *</label>
                   <input type="text" id="nome" name="nome" class="form-control" required />
                 </div>
                 <div class="form-group">
-                  <label class="form-label" for="contato">Contato (WhatsApp)</label>
-                  <input type="text" id="contato" name="contato" class="form-control" placeholder="(11) 99999-9999" />
+                  <label for="contato">Contato (WhatsApp)</label>
+                  <input type="text" id="contato" name="contato" class="form-control" placeholder="(00) 00000-0000" />
                 </div>
               </div>
 
               <div class="form-row">
                 <div class="form-group">
-                  <label class="form-label" for="documento">CPF/CNPJ</label>
+                  <label for="documento">CPF/CNPJ</label>
                   <input type="text" id="documento" name="documento" class="form-control" placeholder="000.000.000-00" />
                 </div>
                 <div class="form-group">
-                  <label class="form-label" for="dataNascimento">Data de Nascimento</label>
+                  <label for="dataNascimento">Data de Nascimento</label>
                   <input type="date" id="dataNascimento" name="dataNascimento" class="form-control" />
                 </div>
               </div>
 
               <div class="form-group">
-                <label class="form-label" for="endereco">Endereço</label>
+                <label for="endereco">Endereço</label>
                 <input type="text" id="endereco" name="endereco" class="form-control" placeholder="Rua, número, bairro, cidade" />
               </div>
 
               <div class="form-row">
                 <div class="form-group">
-                  <label class="form-label" for="fotoUpload">Foto do Cliente</label>
+                  <label for="fotoUpload">Foto do Cliente</label>
                   <input type="file" id="fotoUpload" accept="image/*" class="form-control" />
                   <div style="margin-top: 10px;">
-                    <img id="fotoPreview" src="https://via.placeholder.com/80x80?text=Foto" alt="Preview" style="display: block; width: 80px; height: 80px; border-radius: 8px; object-fit: cover;" />
-                    <small id="fotoNoText" style="color: var(--color-text-secondary); display: none;">Nenhuma foto selecionada</small>
+                    <img id="fotoPreview" src="https://via.placeholder.com/80" alt="Preview" />
+                    <span id="fotoNoText" class="text-muted">Nenhuma foto selecionada</span>
                   </div>
                 </div>
                 <div class="form-group">
-                  <label class="form-label" for="status">Status</label>
+                  <label for="status">Status</label>
                   <select id="status" name="status" class="form-control">
                     <option value="ativo">Ativo</option>
                     <option value="inativo">Inativo</option>
@@ -88,8 +84,8 @@ const ClientesModule = {
               </div>
 
               <div class="form-group">
-                <label class="form-label" for="observacoes">Observações</label>
-                <textarea id="observacoes" name="observacoes" class="form-control" rows="3" placeholder="Informações adicionais sobre o cliente"></textarea>
+                <label for="observacoes">Observações</label>
+                <textarea id="observacoes" name="observacoes" class="form-control" rows="3" placeholder="Informações adicionais"></textarea>
               </div>
 
               <div class="form-actions">
@@ -109,23 +105,33 @@ const ClientesModule = {
     document.getElementById('addClienteBtn').addEventListener('click', () => this.openForm());
     document.getElementById('closeModalBtn').addEventListener('click', () => this.closeForm());
     document.getElementById('fotoUpload').addEventListener('change', this.onFotoUpload.bind(this));
-    document.getElementById('clienteForm').addEventListener('submit', e => this.onSubmit(e));
+    document.getElementById('clienteForm').addEventListener('submit', this.onSubmit.bind(this));
   },
 
-  onFotoUpload(e) {
-    const file = e.target.files[0];
+  onFotoUpload(event) {
+    const file = event.target.files[0];
     if (!file) {
-      Utils.previewPhoto('', 'fotoPreview', 'fotoNoText');
+      this.clearFotoPreview();
       return;
     }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const fotoPreview = document.getElementById('fotoPreview');
+      const fotoNoText = document.getElementById('fotoNoText');
+      fotoPreview.src = reader.result;
+      fotoNoText.style.display = 'none';
+      fotoPreview.style.display = 'block';
+      fotoPreview.dataset.base64 = reader.result;
+    };
+    reader.readAsDataURL(file);
+  },
 
-    Utils.convertToBase64(file, base64 => {
-      const previewImg = document.getElementById('fotoPreview');
-      previewImg.src = base64;
-      previewImg.dataset.base64 = base64;
-      document.getElementById('fotoNoText').style.display = 'none';
-      previewImg.style.display = 'block';
-    });
+  clearFotoPreview() {
+    const fotoPreview = document.getElementById('fotoPreview');
+    const fotoNoText = document.getElementById('fotoNoText');
+    fotoPreview.src = 'https://via.placeholder.com/80';
+    fotoPreview.style.display = 'block';
+    fotoNoText.style.display = 'inline';
   },
 
   openForm(cliente = null) {
@@ -136,117 +142,116 @@ const ClientesModule = {
       document.getElementById('nome').value = cliente.nome || '';
       document.getElementById('contato').value = cliente.contato || '';
       document.getElementById('documento').value = cliente.documento || '';
-      document.getElementById('dataNascimento').value = cliente.dataNascimento ? Utils.formatDateForInput(cliente.dataNascimento) : '';
+      document.getElementById('dataNascimento').value = cliente.dataNascimento || '';
       document.getElementById('endereco').value = cliente.endereco || '';
       document.getElementById('status').value = cliente.status || 'ativo';
       document.getElementById('observacoes').value = cliente.observacoes || '';
-
-      const fotoPreview = document.getElementById('fotoPreview');
-      const fotoNoText = document.getElementById('fotoNoText');
       if (cliente.foto) {
-        fotoPreview.src = cliente.foto;
-        fotoPreview.dataset.base64 = cliente.foto;
-        fotoPreview.style.display = 'block';
-        fotoNoText.style.display = 'none';
+        document.getElementById('fotoPreview').src = cliente.foto;
+        document.getElementById('fotoNoText').style.display = 'none';
       } else {
-        fotoPreview.src = 'https://via.placeholder.com/80x80?text=Foto';
-        fotoPreview.dataset.base64 = '';
-        fotoPreview.style.display = 'block';
-        fotoNoText.style.display = 'none';
+        this.clearFotoPreview();
       }
     } else {
       document.getElementById('clienteForm').reset();
-      const fotoPreview = document.getElementById('fotoPreview');
-      const fotoNoText = document.getElementById('fotoNoText');
-      fotoPreview.src = 'https://via.placeholder.com/80x80?text=Foto';
-      fotoPreview.dataset.base64 = '';
-      fotoPreview.style.display = 'block';
-      fotoNoText.style.display = 'none';
+      this.clearFotoPreview();
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('dataNascimento').value = '';
     }
-
-    Utils.toggleModal('clienteFormModal', true);
+    this.toggleModal(true);
   },
 
   closeForm() {
-    Utils.toggleModal('clienteFormModal', false);
+    this.toggleModal(false);
+  },
+
+  toggleModal(show) {
+    const modal = document.getElementById('clienteFormModal');
+    if (show) {
+      modal.classList.remove('hidden');
+    } else {
+      modal.classList.add('hidden');
+    }
   },
 
   async onSubmit(event) {
     event.preventDefault();
-
+    // Validação simples
     const nome = document.getElementById('nome').value.trim();
-    const contato = document.getElementById('contato').value.trim();
-    const documento = document.getElementById('documento').value.trim();
-    const dataNascimento = document.getElementById('dataNascimento').value;
-    const endereco = document.getElementById('endereco').value.trim();
-    const status = document.getElementById('status').value;
-    const observacoes = document.getElementById('observacoes').value.trim();
-    const foto = document.getElementById('fotoPreview').dataset.base64 || '';
-
     if (!nome) {
-      Utils.alert('O nome é obrigatório.', 'error');
+      alert('Nome é obrigatório');
       return;
     }
-
     const clienteData = {
       nome,
-      contato,
-      documento,
-      dataNascimento,
-      endereco,
-      status,
-      observacoes,
-      foto
+      contato: document.getElementById('contato').value.trim(),
+      documento: document.getElementById('documento').value.trim(),
+      dataNascimento: document.getElementById('dataNascimento').value,
+      endereco: document.getElementById('endereco').value.trim(),
+      foto: document.getElementById('fotoPreview').dataset.base64 || '',
+      status: document.getElementById('status').value,
+      observacoes: document.getElementById('observacoes').value.trim(),
+      responsavel_id: sistema.currentUser.id
     };
-
     try {
       if (this.editingClienteId) {
-        await sistema.supabase.from('clientes').update(clienteData).eq('id', this.editingClienteId);
-        Utils.alert('Cliente atualizado com sucesso!', 'success');
+        await sistema.supabase
+          .from('clientes')
+          .update(clienteData)
+          .eq('id', this.editingClienteId);
       } else {
-        await sistema.supabase.from('clientes').insert([{ ...clienteData, responsavel_id: sistema.currentUser.id, status: 'ativo' }]);
-        Utils.alert('Cliente cadastrado com sucesso!', 'success');
+        await sistema.supabase
+          .from('clientes')
+          .insert([clienteData]);
       }
+      await sistema.loadClients();
       this.closeForm();
       this.loadData();
     } catch (error) {
-      console.error('Erro ao salvar cliente:', error);
-      Utils.alert('Erro ao salvar cliente. Tente novamente.', 'error');
+      alert('Erro ao salvar cliente');
+      console.error(error);
     }
   },
 
   loadData() {
-    const tbody = document.getElementById('clientesTable').querySelector('tbody');
-    const clientes = sistema.clientes.filter(cliente => {
-      if (sistema.currentUser.role === 'admin') return true;
-      if (sistema.currentUser.role === 'manager') {
-        const operadores = sistema.users.filter(u => u.gerente_id === sistema.currentUser.id).map(u => u.id);
-        return operadores.includes(cliente.responsavel_id);
-      }
-      if (sistema.currentUser.role === 'operator') return cliente.responsavel_id === sistema.currentUser.id;
-      return false;
-    });
+    const tbody = document.querySelector('#clientesTable tbody');
+    if (!tbody) return;
+    if (!sistema.currentUser) return;
 
-    if (!clientes.length) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--color-text-secondary);">Nenhum cliente encontrado.</td></tr>';
+    // Filtra clientes conforme papel de usuário
+    let clientesVisiveis = [];
+    if (sistema.currentUser.role === 'admin') {
+      clientesVisiveis = sistema.clientes;
+    } else if (sistema.currentUser.role === 'manager') {
+      const operadores = sistema.users.filter(u => u.gerente_id === sistema.currentUser.id).map(u => u.id);
+      clientesVisiveis = sistema.clientes.filter(c => operadores.includes(c.responsavel_id));
+    } else if (sistema.currentUser.role === 'operator') {
+      clientesVisiveis = sistema.clientes.filter(c => c.responsavel_id === sistema.currentUser.id);
+    }
+
+    if (clientesVisiveis.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7">Nenhum cliente encontrado.</td></tr>';
       return;
     }
-    tbody.innerHTML = clientes.map(cliente => {
-      const responsavel = sistema.users.find(u => u.id === cliente.responsavel_id);
-      const canEdit = false;
-      if (sistema.currentUser.role === 'admin') canEdit = true;
-      if (sistema.currentUser.role === 'manager' && responsavel && responsavel.gerente_id === sistema.currentUser.id) canEdit = true;
-      if (sistema.currentUser.role === 'operator' && cliente.responsavel_id === sistema.currentUser.id) canEdit = true;
+
+    tbody.innerHTML = clientesVisiveis.map((cliente, index) => {
+      const responsavel = sistema.users.find(u => u.id === cliente.responsavel_id) || { name: '-' };
+      const podeEditar =
+        sistema.currentUser.role === 'admin' ||
+        (sistema.currentUser.role === 'manager' && responsavel.gerente_id === sistema.currentUser.id) ||
+        (sistema.currentUser.role === 'operator' && cliente.responsavel_id === sistema.currentUser.id);
 
       return `
         <tr>
-          <td><img src="${cliente.foto || 'https://via.placeholder.com/40x40?text=👤'}" alt="${cliente.nome}" class="client-photo" onerror="this.src='https://via.placeholder.com/40x40?text=👤'"/></td>
-          <td><strong>${cliente.nome}</strong></td>
+          <td><img src="${cliente.foto || 'https://via.placeholder.com/40'}" alt="foto" style="width: 40px; height: 40px; border-radius: 50%;" onerror="this.src='https://via.placeholder.com/40'"/></td>
+          <td>${cliente.nome}</td>
           <td>${cliente.contato || '-'}</td>
           <td>${cliente.documento || '-'}</td>
-          <td><span class="status-badge status-${cliente.status}">${cliente.status.charAt(0).toUpperCase() + cliente.status.slice(1)}</span></td>
-          <td>${responsavel ? responsavel.name : '-'}</td>
-          <td>${canEdit ? `<button class="btn btn--sm btn--secondary" onclick='ClientesModule.openForm(${JSON.stringify(cliente).replace(/"/g, "&quot;")})'>Editar</button>` : '-'}</td>
+          <td><span class="status ${cliente.status}">${cliente.status}</span></td>
+          <td>${responsavel.name}</td>
+          <td>
+            ${podeEditar ? `<button onclick='ClientesModule.openForm(${JSON.stringify(cliente).replace(/'/g, "\\'")})' class="btn btn--sm">Editar</button>` : '-'}
+          </td>
         </tr>`;
     }).join('');
   }

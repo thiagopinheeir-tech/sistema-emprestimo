@@ -1,36 +1,29 @@
-// Sistema de Empréstimos - Arquivo Principal (app.js)
-// =====================================================
-
+// Sistema de Empréstimos - Arquivo Principal
 class SistemaEmprestimos {
   constructor() {
-    // Inicializar Supabase usando configuração do env.js
     this.supabase = null;
     this.initSupabase();
-
     this.isAuthenticated = false;
     this.currentUser = null;
     this.currentPage = 'dashboard';
     this.sidebarOpen = true;
     this.zoomLevel = 1.0;
-
-    // Arrays para cache local
     this.users = [];
     this.clientes = [];
     this.emprestimos = [];
     this.historicoPagamentos = [];
-
     this.init();
   }
 
   initSupabase() {
     if (
-      typeof SUPABASE_CONFIG !== "undefined" &&
-      SUPABASE_CONFIG.url &&
-      SUPABASE_CONFIG.anonKey
+      typeof SUPASE_CONFIG !== "undefined" &&
+      SUPASE_CONFIG.url &&
+      SUPASE_CONFIG.anonKey
     ) {
       this.supabase = supabase.createClient(
-        SUPABASE_CONFIG.url,
-        SUPABASE_CONFIG.anonKey
+        SUPASE_CONFIG.url,
+        SUPASE_CONFIG.anonKey
       );
       console.log("Supabase conectado com sucesso!");
     } else {
@@ -44,22 +37,19 @@ class SistemaEmprestimos {
     this.bindGlobalEvents();
     this.showLogin();
     this.setupResponsiveNavigation();
-    if (this.supabase) {
-      await this.loadInitialData();
-    }
+    if (this.supabase) await this.loadInitialData();
   }
 
-  // ========== CARREGAMENTO DE DADOS ==========
   async loadInitialData() {
     try {
       await Promise.all([
         this.loadUsers(),
         this.loadClientes(),
         this.loadEmprestimos(),
-        this.loadHistorico(),
+        this.loadHistorico()
       ]);
-    } catch (error) {
-      console.error("Erro ao carregar dados:", error);
+    } catch (err) {
+      console.error("Erro ao carregar dados:", err);
     }
   }
 
@@ -119,7 +109,6 @@ class SistemaEmprestimos {
     }
   }
 
-  // ========== AUTENTICAÇÃO ==========
   async login(username, password) {
     try {
       if (!this.supabase) {
@@ -133,15 +122,13 @@ class SistemaEmprestimos {
         .eq("password", password)
         .eq("status", "ativo")
         .single();
-      if (error || !data) {
-        return false;
-      }
+      if (error || !data) return false;
       this.isAuthenticated = true;
       this.currentUser = data;
       await this.loadInitialData();
       return true;
     } catch (error) {
-      console.error("Erro ao fazer login:", error);
+      console.error("Erro no login:", error);
       return false;
     }
   }
@@ -167,55 +154,49 @@ class SistemaEmprestimos {
   }
 
   updateUserInfo() {
-    const userNameElement = document.getElementById("userName");
-    const userRoleElement = document.getElementById("userRole");
-    if (userNameElement) userNameElement.textContent = this.currentUser.name;
-    if (userRoleElement) {
-      const roleNames = {
-        admin: "Administrador",
-        manager: "Gerente",
-        operator: "Operador",
-      };
-      userRoleElement.textContent =
-        roleNames[this.currentUser.role] || this.currentUser.role;
-    }
+    if (!this.currentUser) return;
+    const userNameElem = document.getElementById("userName");
+    const userRoleElem = document.getElementById("userRole");
+    if (userNameElem) userNameElem.textContent = this.currentUser.name;
+    if (userRoleElem)
+      userRoleElem.textContent =
+        {
+          admin: "Administrador",
+          manager: "Gerente",
+          operator: "Operador",
+        }[this.currentUser.role] || this.currentUser.role;
   }
 
   applyRolePermissions() {
-    document.body.classList.remove(
-      "role-admin",
-      "role-manager",
-      "role-operator"
-    );
+    if (!this.currentUser) return;
+    document.body.classList.remove("role-admin", "role-manager", "role-operator");
     document.body.classList.add(`role-${this.currentUser.role}`);
-    document
-      .querySelectorAll(".admin-only")
-      .forEach((el) =>
-        el.classList.toggle("hidden", this.currentUser.role !== "admin")
-      );
-    document
-      .querySelectorAll(".manager-only")
-      .forEach((el) =>
-        el.classList.toggle(
-          "hidden",
-          !["admin", "manager"].includes(this.currentUser.role)
-        )
-      );
-    document
-      .querySelectorAll(".operator-only")
-      .forEach((el) =>
-        el.classList.toggle("hidden", this.currentUser.role !== "operator")
-      );
+    document.querySelectorAll(".admin-only").forEach((el) =>
+      el.classList.toggle("hidden", this.currentUser.role !== "admin")
+    );
+    document.querySelectorAll(".manager-only").forEach((el) =>
+      el.classList.toggle(
+        "hidden",
+        !["admin", "manager"].includes(this.currentUser.role)
+      )
+    );
+    document.querySelectorAll(".operator-only").forEach((el) =>
+      el.classList.toggle("hidden", this.currentUser.role !== "operator")
+    );
   }
 
   showPage(pageId) {
+    if (!this.currentUser) {
+      this.showLogin();
+      return;
+    }
     this.currentPage = pageId;
-    document.querySelectorAll(".nav-item").forEach((item) =>
-      item.classList.remove("active")
+    document.querySelectorAll(".nav-item").forEach((el) =>
+      el.classList.remove("active")
     );
-    document
-      .querySelectorAll(`[data-page="${pageId}"]`)
-      .forEach((item) => item.classList.add("active"));
+    document.querySelectorAll(`[data-page="${pageId}"]`).forEach((el) =>
+      el.classList.add("active")
+    );
     const titles = {
       dashboard: "Dashboard Financeiro",
       cadastro: "Cadastro de Clientes",
@@ -223,45 +204,41 @@ class SistemaEmprestimos {
       historico: "Histórico de Pagamentos",
       usuarios: "Gerenciar Usuários",
     };
-    const titleElement = document.getElementById("pageTitle");
-    if (titleElement) titleElement.textContent = titles[pageId] || "";
+    const titleElem = document.getElementById("pageTitle");
+    if (titleElem) titleElem.textContent = titles[pageId] || "";
     const container = document.getElementById("pagesContainer");
     if (container) container.innerHTML = "";
     switch (pageId) {
       case "dashboard":
-        if (typeof DashboardModule !== "undefined") {
+        if (window.DashboardModule) {
           DashboardModule.render(container);
-          if (DashboardModule.loadData) DashboardModule.loadData();
+          DashboardModule.loadData && DashboardModule.loadData();
         }
         break;
       case "cadastro":
-        if (typeof ClientesModule !== "undefined") {
+        if (window.ClientesModule) {
           ClientesModule.render(container);
-          if (ClientesModule.loadData) ClientesModule.loadData();
+          ClientesModule.loadData && ClientesModule.loadData();
         }
         break;
       case "emprestimos":
-        if (typeof EmprestimosModule !== "undefined") {
+        if (window.EmprestimosModule) {
           EmprestimosModule.render(container);
-          if (EmprestimosModule.loadData) EmprestimosModule.loadData();
+          EmprestimosModule.loadData && EmprestimosModule.loadData();
         }
         break;
       case "historico":
-        if (typeof HistoricoModule !== "undefined") {
+        if (window.HistoricoModule) {
           HistoricoModule.render(container);
-          if (HistoricoModule.loadData) HistoricoModule.loadData();
+          HistoricoModule.loadData && HistoricoModule.loadData();
         }
         break;
       case "usuarios":
-        if (
-          typeof UsuariosModule !== "undefined" &&
-          this.currentUser.role === "admin"
-        ) {
+        if (window.UsuariosModule && this.currentUser.role === "admin") {
           UsuariosModule.render(container);
-          if (UsuariosModule.loadData) UsuariosModule.loadData();
+          UsuariosModule.loadData && UsuariosModule.loadData();
         } else {
-          container.innerHTML =
-            '<div class="no-access"><h3>Acesso negado</h3></div>';
+          container.innerHTML = "<div class='no-access'>Acesso negado</div>";
         }
         break;
     }
@@ -275,23 +252,25 @@ class SistemaEmprestimos {
     });
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
-        document.querySelectorAll(".modal").forEach((modal) => {
-          modal.classList.add("hidden");
-        });
+        document.querySelectorAll(".modal").forEach((modal) =>
+          modal.classList.add("hidden")
+        );
       }
     });
   }
 
   setupResponsiveNavigation() {
-    const sidebarToggle = document.querySelector(".sidebar-toggle");
+    const toggleBtn = document.querySelector(".sidebar-toggle");
     const sidebar = document.querySelector(".sidebar");
-    if (sidebarToggle) {
-      sidebarToggle.addEventListener("click", () => {
+    if (toggleBtn) {
+      toggleBtn.addEventListener("click", () => {
         if (sidebar) sidebar.classList.toggle("open");
       });
     }
   }
+
+  toggleSidebar() {
+    const sidebar = document.querySelector(".sidebar");
+    if (sidebar) sidebar.classList.toggle("open");
+  }
 }
-
-// Não adiciona export, apenas utilize a classe no global `window.sistema = new SistemaEmprestimos();`
-
