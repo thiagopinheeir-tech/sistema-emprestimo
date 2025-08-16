@@ -131,10 +131,10 @@ const UsuariosModule = {
     event.preventDefault();
 
     const username = document.getElementById('username').value.trim();
-    const name = document.getElementById('name').value.trim();
-    const role = document.getElementById('role').value;
+    const name     = document.getElementById('name').value.trim();
+    const role     = document.getElementById('role').value;
     const gerente_id = document.getElementById('gerente_id').value || null;
-    const status = document.getElementById('status').value;
+    const status   = document.getElementById('status').value;
     const password = document.getElementById('password').value.trim();
 
     if (!username || !name || !password) {
@@ -143,8 +143,22 @@ const UsuariosModule = {
     }
 
     if (this.editingUserId) {
-      Utils.alert('Edição de usuário ainda não implementada.', 'info');
+      // **AGORA IMPLEMENTADO!**
+      await sistema.supabase.from('usuarios').update({
+        username,
+        name,
+        role,
+        gerente_id,
+        status,
+        password
+      }).eq('id', this.editingUserId);
+
+      await sistema.loadInitialData(); // Atualiza lista local
+      this.closeForm();
+      this.loadData();
+      Utils.alert('Usuário atualizado com sucesso!', 'info');
     } else {
+      // NOVO USUÁRIO
       await sistema.supabase.from('usuarios').insert([{
         username,
         name,
@@ -153,9 +167,10 @@ const UsuariosModule = {
         status,
         password
       }]);
-      sistema.loadInitialData();
+      await sistema.loadInitialData(); // Atualiza lista local
       this.closeForm();
       this.loadData();
+      Utils.alert('Usuário cadastrado com sucesso!', 'info');
     }
   },
 

@@ -7,7 +7,6 @@ const EmprestimosModule = {
         <h2>Empréstimos</h2>
         <button class="btn btn--primary" id="addEmprestimoBtn">Novo Empréstimo</button>
       </section>
-
       <section class="table-container">
         <table class="table" id="emprestimosTable">
           <thead>
@@ -83,26 +82,29 @@ const EmprestimosModule = {
 
   async onSubmit(event) {
     event.preventDefault();
-    const clienteId = document.getElementById('clienteId').value;
+    const clienteId    = document.getElementById('clienteId').value;
     const valorPrincipal = parseFloat(document.getElementById('valorPrincipal').value);
-    const jurosPerc = parseFloat(document.getElementById('jurosPerc').value);
-    const dataInicio = document.getElementById('dataInicio').value;
+    const jurosPerc    = parseFloat(document.getElementById('jurosPerc').value);
+    const dataInicio   = document.getElementById('dataInicio').value;
 
     if (!clienteId || isNaN(valorPrincipal) || isNaN(jurosPerc) || !dataInicio) {
       Utils.alert('Todos os campos são obrigatórios!', 'error');
       return;
     }
 
-    await sistema.addEmprestimo({
+    await sistema.supabase.from('emprestimos').insert([{
       clienteId,
       valorPrincipal,
       jurosPerc,
       dataInicio,
-      status: "ativo"
-    });
+      status: "ativo",
+      responsavel_id: sistema.currentUser.id
+    }]);
 
+    await sistema.loadEmprestimos(); // Atualiza lista local
     this.closeForm();
     this.loadData();
+    Utils.alert('Empréstimo cadastrado com sucesso!', 'info');
   },
 
   populateClientesSelect() {
@@ -130,7 +132,7 @@ const EmprestimosModule = {
 
       return `
         <tr>
-          <td><img src="${cliente.foto || 'https://via.placeholder.com/40'}" alt="${cliente.nome || ''}" width="40" height="40" /></td>
+          <td><img src="${cliente.foto || 'https://via.placeholder.com/40'}" alt="${cliente.nome || ''}" width="40" height="40" style="border-radius:8px;" /></td>
           <td>${cliente.nome || '-'}</td>
           <td>${emp.dataInicio ? Utils.formatDateForInput(emp.dataInicio) : '-'}</td>
           <td>${vencimento}</td>
