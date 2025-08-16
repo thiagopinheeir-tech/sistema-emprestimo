@@ -1,21 +1,17 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<<<<<<< HEAD
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sistema de Empréstimos</title>
-  <meta name="description" content="Sistema completo para gestão de empréstimos, clientes e cobranças">
-  
-  <!-- CSS -->
-  <link rel="stylesheet" href="style.css">
-  
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+  <meta name="description" content="Sistema completo para gerenciamento de empréstimos, clientes e cobranças"/>
+  <link rel="stylesheet" href="style.css"/>
+  <!-- Chart.js e Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
-
 <body>
-  <!-- Tela de Login -->
+  <!-- Tela Login -->
   <div id="loginContainer" class="login-container">
     <div class="login-card">
       <div class="login-header">
@@ -23,21 +19,18 @@
         <h1 class="login-title">Sistema de Empréstimos</h1>
         <p class="login-subtitle">Faça login para acessar o sistema</p>
       </div>
-      
       <div id="loginError" class="login-error hidden"></div>
-      
       <form id="loginForm" autocomplete="off">
         <div class="form-group">
           <label class="form-label" for="username">Usuário</label>
-          <input type="text" id="username" name="username" class="form-control" required autocomplete="username">
+          <input type="text" id="username" name="username" class="form-control" required autocomplete="username" />
         </div>
         <div class="form-group">
           <label class="form-label" for="password">Senha</label>
-          <input type="password" id="password" name="password" class="form-control" required autocomplete="current-password">
+          <input type="password" id="password" name="password" class="form-control" required autocomplete="current-password" />
         </div>
         <button type="submit" class="btn btn--primary btn--full-width">Entrar no Sistema</button>
       </form>
-      
       <div class="login-info">
         <small>
           <strong>Usuários de teste:</strong><br>
@@ -45,315 +38,124 @@
           👩‍💼 Gerente: <code>gerente / 123456</code><br>
           👤 Operador: <code>operador / 123456</code>
         </small>
-=======
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Sistema de Empréstimos</title>
-  <link rel="stylesheet" href="style.css"/>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
-  <div id="loginContainer" class="login-container">
-    <div class="login-card">
-      <div class="login-header">
-        <span class="app-icon">💰</span>
-        <h1 class="login-title">Sistema de Empréstimos</h1>
-        <p class="login-subtitle">Acesse sua conta</p>
-      </div>
-      <div id="loginError" class="login-error hidden"></div>
-      <form id="loginForm" autocomplete="off">
-        <div class="form-group">
-          <label for="username">Usuário</label>
-          <input type="text" id="username" required />
-        </div>
-        <div class="form-group">
-          <label for="password">Senha</label>
-          <input type="password" id="password" required />
-        </div>
-        <button type="submit" class="btn btn--primary btn--full-width">Entrar</button>
-      </form>
-      <div class="login-info">
-        <small>Teste: admin/123456 &bull; gerente/123456 &bull; operador/123456</small>
->>>>>>> 3d9d87908cfcf02c68054e3ac557608d4a425c20
       </div>
     </div>
   </div>
 
-<<<<<<< HEAD
-  <!-- Aplicação Principal -->
+  <!-- App Principal -->
   <div id="appContainer" class="hidden app-container">
-    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <div class="sidebar-title">
-          <span class="app-icon">💰</span>
-          Sistema de Empréstimos
+          <span class="app-icon">💰</span> Sistema de Empréstimos
         </div>
       </div>
-      
       <nav class="sidebar-nav">
-        <button class="nav-item" data-page="dashboard" onclick="sistema.showPage('dashboard'); return false;">
-          <span class="nav-icon">📊</span>
-          <span class="nav-text">Dashboard</span>
+        <button class="nav-item" data-page="dashboard" onclick="sistema.showPage('dashboard');return false;">
+          <span class="nav-icon">📊</span><span class="nav-text">Dashboard</span>
         </button>
-        
-        <button class="nav-item" data-page="cadastro" onclick="sistema.showPage('cadastro'); return false;">
-          <span class="nav-icon">👥</span>
-          <span class="nav-text">Clientes</span>
+        <button class="nav-item" data-page="cadastro" onclick="sistema.showPage('cadastro');return false;">
+          <span class="nav-icon">👥</span><span class="nav-text">Clientes</span>
         </button>
-        
-        <button class="nav-item" data-page="emprestimos" onclick="sistema.showPage('emprestimos'); return false;">
-          <span class="nav-icon">💰</span>
-          <span class="nav-text">Empréstimos</span>
+        <button class="nav-item" data-page="emprestimos" onclick="sistema.showPage('emprestimos');return false;">
+          <span class="nav-icon">💰</span><span class="nav-text">Empréstimos</span>
         </button>
-        
-        <button class="nav-item" data-page="historico" onclick="sistema.showPage('historico'); return false;">
-          <span class="nav-icon">📈</span>
-          <span class="nav-text">Histórico</span>
+        <button class="nav-item" data-page="historico" onclick="sistema.showPage('historico');return false;">
+          <span class="nav-icon">📈</span><span class="nav-text">Histórico</span>
         </button>
-        
-        <button class="nav-item admin-only" data-page="usuarios" onclick="sistema.showPage('usuarios'); return false;">
-          <span class="nav-icon">⚙️</span>
-          <span class="nav-text">Usuários</span>
+        <button class="nav-item admin-only" data-page="usuarios" onclick="sistema.showPage('usuarios');return false;">
+          <span class="nav-icon">⚙️</span><span class="nav-text">Usuários</span>
         </button>
       </nav>
     </aside>
-
-    <!-- Conteúdo Principal -->
     <main class="main-content">
-      <!-- Header -->
       <header class="header">
         <div class="flex">
           <button class="sidebar-toggle" onclick="sistema.toggleSidebar()">☰</button>
           <h2 class="page-title" id="pageTitle">Dashboard Financeiro</h2>
         </div>
-        
         <div class="header-user">
           <div class="user-info">
-            <span class="user-name" id="userName">Usuário</span>
-            <span class="user-role" id="userRole">Função</span>
+            <span class="user-name" id="userName"></span>
+            <span class="user-role" id="userRole"></span>
           </div>
-          <button class="btn btn--secondary btn--sm" onclick="sistema.logout()">
-            <span>🚪</span>
-            <span>Sair</span>
-          </button>
+          <button class="btn btn--secondary btn--sm" onclick="sistema.logout()">🚪 <span>Sair</span></button>
         </div>
       </header>
-
-      <!-- Container das Páginas -->
-      <div class="page active" id="pagesContainer">
-        <!-- Conteúdo será carregado dinamicamente pelos módulos -->
-      </div>
+      <div class="page active" id="pagesContainer"></div>
     </main>
   </div>
 
-  <!-- Bottom Navigation (Mobile) -->
+  <!-- Bottom Navigation Mobile -->
   <nav class="bottom-nav" id="bottomNav">
-    <button class="nav-item" data-page="dashboard" onclick="sistema.showPage('dashboard'); return false;">
-      <span class="nav-icon">📊</span>
-      <span class="nav-label">Dashboard</span>
+    <button class="nav-item" data-page="dashboard" onclick="sistema.showPage('dashboard');return false;">
+      <span class="nav-icon">📊</span><span class="nav-label">Dashboard</span>
     </button>
-    
-    <button class="nav-item" data-page="cadastro" onclick="sistema.showPage('cadastro'); return false;">
-      <span class="nav-icon">👥</span>
-      <span class="nav-label">Clientes</span>
+    <button class="nav-item" data-page="cadastro" onclick="sistema.showPage('cadastro');return false;">
+      <span class="nav-icon">👥</span><span class="nav-label">Clientes</span>
     </button>
-    
-    <button class="nav-item" data-page="emprestimos" onclick="sistema.showPage('emprestimos'); return false;">
-      <span class="nav-icon">💰</span>
-      <span class="nav-label">Empréstimos</span>
+    <button class="nav-item" data-page="emprestimos" onclick="sistema.showPage('emprestimos');return false;">
+      <span class="nav-icon">💰</span><span class="nav-label">Empréstimos</span>
     </button>
-    
-    <button class="nav-item" data-page="historico" onclick="sistema.showPage('historico'); return false;">
-      <span class="nav-icon">📈</span>
-      <span class="nav-label">Histórico</span>
+    <button class="nav-item" data-page="historico" onclick="sistema.showPage('historico');return false;">
+      <span class="nav-icon">📈</span><span class="nav-label">Histórico</span>
     </button>
-    
-    <button class="nav-item admin-only" data-page="usuarios" onclick="sistema.showPage('usuarios'); return false;">
-      <span class="nav-icon">⚙️</span>
-      <span class="nav-label">Usuários</span>
+    <button class="nav-item admin-only" data-page="usuarios" onclick="sistema.showPage('usuarios');return false;">
+      <span class="nav-icon">⚙️</span><span class="nav-label">Usuários</span>
     </button>
   </nav>
 
-  <!-- Scripts -->
+  <!-- Ordem dos Scripts: -->
   <script src="env.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
-  <!-- Módulos do Sistema -->
-=======
-  <div id="appContainer" class="hidden">
-    <aside id="sidebar" class="sidebar">
-      <div class="sidebar-header">
-        <span class="app-title"><span class="app-icon">💰</span> Empréstimos</span>
-      </div>
-      <nav class="sidebar-nav">
-        <a class="nav-item" data-page="dashboard" href="#" onclick="sistema.showPage('dashboard'); return false;">Dashboard</a>
-        <a class="nav-item" data-page="cadastro" href="#" onclick="sistema.showPage('cadastro'); return false;">Clientes</a>
-        <a class="nav-item" data-page="emprestimos" href="#" onclick="sistema.showPage('emprestimos'); return false;">Empréstimos</a>
-        <a class="nav-item" data-page="historico" href="#" onclick="sistema.showPage('historico'); return false;">Histórico</a>
-        <a class="nav-item admin-only" data-page="usuarios" href="#" onclick="sistema.showPage('usuarios'); return false;">Usuários</a>
-      </nav>
-    </aside>
-    <main class="main-content">
-      <header class="header flex">
-        <button class="sidebar-toggle" onclick="sistema.toggleSidebar()">☰</button>
-        <h2 id="pageTitle">Dashboard Financeiro</h2>
-        <div class="user-info">
-          <span id="userName"></span>
-          <span class="user-role" id="userRole"></span>
-          <button class="btn btn--outline btn--sm" onclick="sistema.logout()">Sair</button>
-        </div>
-      </header>
-      <div id="pagesContainer" class="page-container"></div>
-    </main>
-  </div>
-
-  <!-- Scripts -->
->>>>>>> 3d9d87908cfcf02c68054e3ac557608d4a425c20
   <script src="utils.js"></script>
   <script src="dashboard.js"></script>
   <script src="clientes.js"></script>
   <script src="emprestimos.js"></script>
   <script src="historico.js"></script>
   <script src="usuarios.js"></script>
-<<<<<<< HEAD
-  
-  <!-- Sistema Principal -->
   <script src="app.js"></script>
 
   <script>
-    // Inicialização do Sistema
+    // Inicialização do sistema
     window.addEventListener('DOMContentLoaded', () => {
-      // Inicializar o sistema
       window.sistema = new SistemaEmprestimos();
 
-      // Configurar formulário de login
       document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value.trim();
         const errorDiv = document.getElementById('loginError');
-        
+
         if (!username || !password) {
           errorDiv.textContent = "Por favor, preencha usuário e senha.";
           errorDiv.classList.remove('hidden');
           return;
         }
 
-        // Mostrar loading
+        // Estado de loading no botão
         const submitBtn = e.target.querySelector('button[type="submit"]');
-        const originalText = submitBtn.textContent;
+        const origText = submitBtn.textContent;
         submitBtn.textContent = 'Entrando...';
         submitBtn.disabled = true;
 
         try {
           const success = await sistema.login(username, password);
-          
           if (success) {
             errorDiv.classList.add('hidden');
             sistema.showApp();
           } else {
-            errorDiv.textContent = "Usuário ou senha incorretos. Verifique suas credenciais.";
+            errorDiv.textContent = "Usuário ou senha incorretos.";
             errorDiv.classList.remove('hidden');
           }
         } catch (error) {
-          console.error('Erro no login:', error);
-          errorDiv.textContent = "Erro ao fazer login. Tente novamente.";
+          errorDiv.textContent = "Erro ao fazer login.";
           errorDiv.classList.remove('hidden');
         } finally {
-          // Restaurar botão
-          submitBtn.textContent = originalText;
+          submitBtn.textContent = origText;
           submitBtn.disabled = false;
         }
       });
-
-      // Configurar eventos globais
-      setupGlobalEvents();
-    });
-
-    // Eventos globais
-    function setupGlobalEvents() {
-      // Fechar modais com Escape
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          document.querySelectorAll('.modal:not(.hidden)').forEach(modal => {
-            modal.classList.add('hidden');
-          });
-        }
-      });
-
-      // Fechar modais clicando fora
-      document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal')) {
-          e.target.classList.add('hidden');
-        }
-      });
-
-      // Responsividade
-      window.addEventListener('resize', handleResize);
-      handleResize(); // Executar na inicialização
-    }
-
-    // Gerenciar responsividade
-    function handleResize() {
-      const isMobile = window.innerWidth <= 768;
-      const sidebar = document.getElementById('sidebar');
-      const bottomNav = document.getElementById('bottomNav');
-
-      if (isMobile) {
-        bottomNav.style.display = 'flex';
-        sidebar.classList.remove('open');
-      } else {
-        bottomNav.style.display = 'none';
-        sidebar.classList.remove('open');
-      }
-    }
-
-    // Service Worker para PWA (opcional)
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        // Implementar service worker se necessário
-      });
-    }
-
-    // Tratamento de erros globais
-    window.addEventListener('error', (e) => {
-      console.error('Erro global:', e.error);
-    });
-
-    window.addEventListener('unhandledrejection', (e) => {
-      console.error('Promise rejeitada:', e.reason);
     });
   </script>
 </body>
 </html>
-=======
-
-  <script src="env.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js"></script>
-  <script>
-    window.addEventListener('DOMContentLoaded', () => {
-      window.sistema = new SistemaEmprestimos();
-
-      document.getElementById('loginForm').addEventListener('submit', async e => {
-        e.preventDefault();
-        const ok = await sistema.login(
-          document.getElementById('username').value,
-          document.getElementById('password').value
-        );
-        if (ok) {
-          document.getElementById('loginError').classList.add('hidden');
-          sistema.showApp();
-        } else {
-          const errDiv = document.getElementById('loginError');
-          errDiv.textContent = "Usuário ou senha incorretos";
-          errDiv.classList.remove('hidden');
-        }
-      });
-    });
-  </script>
-</body>
-</html>
->>>>>>> 3d9d87908cfcf02c68054e3ac557608d4a425c20

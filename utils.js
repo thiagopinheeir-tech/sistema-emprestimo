@@ -1,16 +1,8 @@
-<<<<<<< HEAD
 // Utilitários Compartilhados (utils.js)
 // ======================================
 
 const Utils = {
-  
-  // Formatação de moeda
-=======
-// utils.js
-
-const Utils = {
   // Formata número em moeda brasileira
->>>>>>> 3d9d87908cfcf02c68054e3ac557608d4a425c20
   formatCurrency(value) {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -18,21 +10,13 @@ const Utils = {
     }).format(value || 0);
   },
 
-<<<<<<< HEAD
-  // Cálculo de juros
-=======
   // Calcula juros simples percentual
->>>>>>> 3d9d87908cfcf02c68054e3ac557608d4a425c20
   calcularJuros(valorPrincipal, jurosPerc) {
     if (!valorPrincipal || !jurosPerc) return 0;
     return parseFloat(valorPrincipal) * parseFloat(jurosPerc) / 100;
   },
 
-<<<<<<< HEAD
-  // Calcular vencimento (adiciona 1 mês à data)
-=======
   // Calcula vencimento adicionando 1 mês à data inicial
->>>>>>> 3d9d87908cfcf02c68054e3ac557608d4a425c20
   calcularVencimento(dataInicio) {
     if (!dataInicio) return '-';
     const data = new Date(dataInicio);
@@ -40,11 +24,7 @@ const Utils = {
     return data.toLocaleDateString('pt-BR');
   },
 
-<<<<<<< HEAD
-  // Calcular atraso em dias
-=======
   // Calcula dias de atraso a partir da data de início + 1 mês
->>>>>>> 3d9d87908cfcf02c68054e3ac557608d4a425c20
   calcularAtraso(emprestimo) {
     const hoje = new Date();
     const vencimento = new Date(emprestimo.dataInicio);
@@ -53,40 +33,6 @@ const Utils = {
     return Math.max(0, diasAtraso);
   },
 
-<<<<<<< HEAD
-  // Calcular multa por atraso
-  calcularMulta(valorJuros, diasAtraso) {
-    if (diasAtraso <= 0) return 0;
-    const percentualMulta = diasAtraso * 0.02; // 2% por dia
-    return valorJuros * percentualMulta;
-  },
-
-  // Extrair número WhatsApp válido
-  extrairNumeroWhatsApp(contato) {
-    if (!contato) return null;
-    const numero = contato.replace(/\D/g, '');
-    
-    if (numero.length === 11 && numero.startsWith('11')) {
-      return '55' + numero;
-    }
-    
-    if (numero.length === 10) {
-      return '55' + numero.substring(0, 2) + '9' + numero.substring(2);
-    }
-    
-    if (numero.length === 13 && numero.startsWith('55')) {
-      return numero;
-    }
-    
-    return numero.length >= 10 ? '55' + numero : numero;
-  },
-
-  // Gerar mensagem de cobrança WhatsApp
-  gerarMensagemCobranca(cliente, emprestimo, valores) {
-    const vencimento = new Date(emprestimo.dataInicio);
-    vencimento.setMonth(vencimento.getMonth() + 1);
-    
-=======
   // Calcula multa aplicada conforme dias de atraso (2% por dia)
   calcularMulta(valorJuros, diasAtraso) {
     if (diasAtraso <= 0) return 0;
@@ -114,7 +60,7 @@ const Utils = {
   gerarMensagemCobranca(cliente, emprestimo, valores) {
     const vencimento = new Date(emprestimo.dataInicio);
     vencimento.setMonth(vencimento.getMonth() + 1);
->>>>>>> 3d9d87908cfcf02c68054e3ac557608d4a425c20
+
     let statusMensagem = '';
     if (valores.diasAtraso === 0) {
       statusMensagem = '⚠️ Hoje é o vencimento. Pagamento deve ser feito até o fim do dia para evitar multa.';
@@ -123,28 +69,11 @@ const Utils = {
     } else {
       statusMensagem = `🔴 Pagamento em atraso há ${valores.diasAtraso} dias. Pagamento deve ser feito o quanto antes.`;
     }
-<<<<<<< HEAD
 
-=======
->>>>>>> 3d9d87908cfcf02c68054e3ac557608d4a425c20
-    return `Opa, ${cliente.nome} 👋
-
-O vencimento do seu pagamento foi em ${vencimento.toLocaleDateString('pt-BR')}.
-
-<<<<<<< HEAD
-💰 **Valores:**
-• Juros original: ${Utils.formatCurrency(valores.jurosOriginal)}
-• Juros com multa: ${Utils.formatCurrency(valores.jurosComMulta)}
-• **Valor Total: ${Utils.formatCurrency(valores.valorTotal)}**
-
-${statusMensagem}
-
-📱 Se tiver dúvidas, chama aqui! 👍
-
-*Mensagem automática do Sistema de Empréstimos*`;
+    return `Opa, ${cliente.nome} 👋\n\nO vencimento do seu pagamento foi em ${vencimento.toLocaleDateString('pt-BR')}.\n\n💰 Valores:\n• Juros original: ${Utils.formatCurrency(valores.jurosOriginal)}\n• Juros com multa: ${Utils.formatCurrency(valores.jurosComMulta)}\n• Valor Total: ${Utils.formatCurrency(valores.valorTotal)}\n\n${statusMensagem}\n\n📱 Se tiver dúvidas, chama aqui! 👍\n\n*Mensagem automática do Sistema de Empréstimos*`;
   },
 
-  // Enviar cobrança via WhatsApp
+  // Envia mensagem de cobrança via WhatsApp
   enviarCobrancaWhatsApp(emprestimoId) {
     const emprestimo = sistema.emprestimos.find(e => e.id === emprestimoId);
     if (!emprestimo || !sistema.canEditClient(emprestimo.clienteId)) {
@@ -158,42 +87,12 @@ ${statusMensagem}
       return;
     }
 
-=======
-Valores:
-
-- Juros original: ${Utils.formatCurrency(valores.jurosOriginal)}
-
-- Juros com multa: ${Utils.formatCurrency(valores.jurosComMulta)}
-
-- Valor Total: ${Utils.formatCurrency(valores.valorTotal)}
-
-${statusMensagem}
-
-Se tiver dúvidas, chama aqui! 👍`;
-  },
-
-  // Envia mensagem de cobrança via WhatsApp
-  enviarCobrancaWhatsApp(emprestimoId) {
-    const emprestimo = sistema.emprestimos.find(e => e.id === emprestimoId);
-    if (!emprestimo || !sistema.canEditClient(emprestimo.clienteId)) {
-      alert('Empréstimo não encontrado ou sem permissão.');
-      return;
-    }
-    const cliente = sistema.clientes.find(c => c.id === emprestimo.clienteId);
-    if (!cliente || !cliente.contato) {
-      alert('Cliente não possui número de contato cadastrado.');
-      return;
-    }
->>>>>>> 3d9d87908cfcf02c68054e3ac557608d4a425c20
     const diasAtraso = Utils.calcularAtraso(emprestimo);
     const jurosOriginal = Utils.calcularJuros(emprestimo.valorPrincipal, emprestimo.jurosPerc);
     const multa = Utils.calcularMulta(jurosOriginal, diasAtraso);
     const jurosComMulta = jurosOriginal + multa;
     const valorTotal = emprestimo.valorPrincipal + jurosComMulta;
-<<<<<<< HEAD
 
-=======
->>>>>>> 3d9d87908cfcf02c68054e3ac557608d4a425c20
     const mensagem = Utils.gerarMensagemCobranca(cliente, emprestimo, {
       diasAtraso,
       jurosOriginal,
@@ -201,7 +100,6 @@ Se tiver dúvidas, chama aqui! 👍`;
       jurosComMulta,
       valorTotal
     });
-<<<<<<< HEAD
 
     const numeroWhatsApp = Utils.extrairNumeroWhatsApp(cliente.contato);
     if (!numeroWhatsApp) {
@@ -214,43 +112,18 @@ Se tiver dúvidas, chama aqui! 👍`;
 
     try {
       window.open(urlWhatsApp, '_blank');
-      
       setTimeout(() => {
         if (confirm('Cobrança enviada com sucesso! Deseja registrar a tentativa de cobrança no histórico?')) {
-          // Registrar tentativa de cobrança (implementar se necessário)
-          console.log(`Cobrança enviada para ${cliente.nome} em ${new Date().toLocaleString()}`);
+          // Implementar função de registrar tentativa no histórico se necessário
           Utils.alert('Cobrança registrada no histórico!', 'success');
         }
       }, 1000);
     } catch (error) {
-      console.error('Erro ao abrir WhatsApp:', error);
       Utils.alert('Erro ao abrir WhatsApp. Verifique se o aplicativo está instalado.', 'error');
     }
   },
 
-  // Converter arquivo para base64
-=======
-    const numeroWhatsApp = Utils.extrairNumeroWhatsApp(cliente.contato);
-    if (!numeroWhatsApp) {
-      alert('Número de WhatsApp inválido.');
-      return;
-    }
-    const mensagemCodificada = encodeURIComponent(mensagem);
-    const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${mensagemCodificada}`;
-    try {
-      window.open(urlWhatsApp, '_blank');
-      setTimeout(() => {
-        if (confirm('Cobrança enviada com sucesso! Deseja registrar a tentativa de cobrança?')) {
-          console.log(`Cobrança enviada para ${cliente.nome} em ${new Date().toLocaleString()}`);
-        }
-      }, 1000);
-    } catch (error) {
-      alert('Erro ao abrir WhatsApp. Verifique se o aplicativo está instalado.');
-    }
-  },
-
   // Converte arquivo em base64
->>>>>>> 3d9d87908cfcf02c68054e3ac557608d4a425c20
   convertToBase64(file, callback) {
     if (!file) return;
     const reader = new FileReader();
@@ -258,17 +131,14 @@ Se tiver dúvidas, chama aqui! 👍`;
     reader.readAsDataURL(file);
   },
 
-<<<<<<< HEAD
-  // Preview de foto
+  // Exibe preview de foto (URL/base64)
   previewPhoto(photoUrl, previewImgId, noPhotoTextId) {
     const previewImg = document.getElementById(previewImgId);
     const noPhotoText = document.getElementById(noPhotoTextId);
-    
     if (photoUrl && photoUrl.trim() !== '') {
       previewImg.src = photoUrl;
       previewImg.style.display = 'block';
       if (noPhotoText) noPhotoText.style.display = 'none';
-      
       previewImg.onerror = () => {
         previewImg.style.display = 'none';
         if (noPhotoText) {
@@ -285,309 +155,73 @@ Se tiver dúvidas, chama aqui! 👍`;
     }
   },
 
-  // Gerar ID único
+  // Gera ID único simples
   generateId(prefix = '') {
     return prefix + Date.now().toString() + Math.random().toString(36).substr(2, 9);
   },
 
-  // Limpar formulário
+  // Limpa formulário HTML pelo id
   clearForm(formId) {
     const form = document.getElementById(formId);
     if (form) form.reset();
   },
 
-  // Mostrar/esconder modal
+  // Mostrar/Esconder modal
   toggleModal(modalId, show = true) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
-    
     if (show) {
       modal.classList.remove('hidden');
-      // Focar no primeiro campo do formulário se existir
       const firstInput = modal.querySelector('input, select, textarea');
       if (firstInput) {
         setTimeout(() => firstInput.focus(), 100);
       }
-=======
-  // Exibe preview da foto (URL/base64) ou mensagem de erro
-  previewPhoto(photoUrl, previewImgId, noPhotoTextId) {
-    const previewImg = document.getElementById(previewImgId);
-    const noPhotoText = document.getElementById(noPhotoTextId);
-    if (photoUrl && photoUrl.trim() !== '') {
-      previewImg.src = photoUrl;
-      previewImg.style.display = 'block';
-      noPhotoText.style.display = 'none';
-      previewImg.onerror = () => {
-        previewImg.style.display = 'none';
-        noPhotoText.style.display = 'block';
-        noPhotoText.textContent = 'Erro ao carregar imagem';
-      };
-    } else {
-      previewImg.style.display = 'none';
-      noPhotoText.style.display = 'block';
-      noPhotoText.textContent = 'Nenhuma foto selecionada';
-    }
-  },
-
-  // Gera ID único simples (timestamp)
-  generateId(prefix = '') {
-    return prefix + Date.now().toString();
-  },
-
-  // Limpa formulário HTML pelo id
-  clearForm(formId) {
-    document.getElementById(formId).reset();
-  },
-
-  // Mostrar/Esconder modal
-  toggleModal(modalId, show = true) {
-    const modal = document.getElementById(modalId);
-    if (show) {
-      modal.classList.remove('hidden');
->>>>>>> 3d9d87908cfcf02c68054e3ac557608d4a425c20
     } else {
       modal.classList.add('hidden');
     }
   },
 
-<<<<<<< HEAD
-  // Confirmar ação
-=======
   // Confirmar ação com callback
->>>>>>> 3d9d87908cfcf02c68054e3ac557608d4a425c20
   confirm(message, callback) {
     if (window.confirm(message)) {
       callback();
     }
   },
 
-<<<<<<< HEAD
-  // Mostrar alerta/notificação
-  alert(message, type = 'info') {
-    // Implementação básica - pode ser melhorada com toast/notificações
-    const alertTypes = {
-      'success': '✅',
-      'error': '❌',
-      'warning': '⚠️',
-      'info': 'ℹ️'
-    };
-    
-    const icon = alertTypes[type] || alertTypes.info;
-    window.alert(`${icon} ${message}`);
-  },
-
-  // Validar CPF (básico)
-  validarCPF(cpf) {
-    if (!cpf) return true; // Campo opcional
-=======
-  // Alerta simplificado (para toasts futuros)
+  // Mensagem de alerta básica
   alert(message, type = 'info') {
     window.alert(message);
   },
 
-  // Valida CPF básico (11 digitos)
+  // Valida CPF básico (11 dígitos)
   validarCPF(cpf) {
-    if (!cpf) return true; // Opcional
->>>>>>> 3d9d87908cfcf02c68054e3ac557608d4a425c20
+    if (!cpf) return true;
     const cpfLimpo = cpf.replace(/\D/g, '');
     return cpfLimpo.length === 11;
   },
 
-<<<<<<< HEAD
-  // Validar CNPJ (básico)
-  validarCNPJ(cnpj) {
-    if (!cnpj) return true; // Campo opcional
-    const cnpjLimpo = cnpj.replace(/\D/g, '');
-    return cnpjLimpo.length === 14;
-  },
-
-  // Validar telefone (básico)
-  validarTelefone(telefone) {
-    if (!telefone) return true; // Campo opcional
-=======
   // Valida telefone simples (10 ou mais dígitos)
   validarTelefone(telefone) {
     if (!telefone) return true;
->>>>>>> 3d9d87908cfcf02c68054e3ac557608d4a425c20
     const telefoneLimpo = telefone.replace(/\D/g, '');
     return telefoneLimpo.length >= 10;
   },
 
-<<<<<<< HEAD
-  // Validar email
-  validarEmail(email) {
-    if (!email) return true; // Campo opcional
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
-  },
-
-  // Formatar data para input
-=======
-  // Formata data para input date yyyy-mm-dd
->>>>>>> 3d9d87908cfcf02c68054e3ac557608d4a425c20
+  // Formata data para input type="date" (yyyy-mm-dd)
   formatDateForInput(dateString) {
     if (!dateString) return '';
     const date = new Date(dateString);
     return date.toISOString().split('T')[0];
   },
 
-<<<<<<< HEAD
-  // Formatar data para exibição
+  // Formata data para exibição segundo padrão pt-BR
   formatDateForDisplay(dateString) {
     if (!dateString) return '-';
     const date = new Date(dateString);
     return date.toLocaleDateString('pt-BR');
   },
 
-  // Debounce para busca
-  debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
-      };
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-    };
-  },
-
-  // Ordenar array por propriedade
-  sortBy(array, property, ascending = true) {
-    return array.sort((a, b) => {
-      const aValue = a[property];
-      const bValue = b[property];
-      
-      if (aValue === bValue) return 0;
-      
-      if (ascending) {
-        return aValue > bValue ? 1 : -1;
-      } else {
-        return aValue < bValue ? 1 : -1;
-      }
-    });
-  },
-
-  // Filtrar array por texto
-  filterByText(array, searchText, properties = []) {
-    if (!searchText) return array;
-    const lowerSearchText = searchText.toLowerCase();
-    
-    return array.filter(item => {
-      return properties.some(prop => {
-        const value = item[prop];
-        return value && value.toString().toLowerCase().includes(lowerSearchText);
-      });
-    });
-  },
-
-  // Formatar número de telefone para exibição
-  formatPhone(phone) {
-    if (!phone) return '';
-    const numbers = phone.replace(/\D/g, '');
-    
-    if (numbers.length === 11) {
-      return numbers.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-    } else if (numbers.length === 10) {
-      return numbers.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
-    }
-    
-    return phone;
-  },
-
-  // Formatar CPF para exibição
-  formatCPF(cpf) {
-    if (!cpf) return '';
-    const numbers = cpf.replace(/\D/g, '');
-    
-    if (numbers.length === 11) {
-      return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-    }
-    
-    return cpf;
-  },
-
-  // Formatar CNPJ para exibição
-  formatCNPJ(cnpj) {
-    if (!cnpj) return '';
-    const numbers = cnpj.replace(/\D/g, '');
-    
-    if (numbers.length === 14) {
-      return numbers.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
-    }
-    
-    return cnpj;
-  },
-
-  // Calcular idade
-  calcularIdade(dataNascimento) {
-    if (!dataNascimento) return null;
-    const hoje = new Date();
-    const nascimento = new Date(dataNascimento);
-    let idade = hoje.getFullYear() - nascimento.getFullYear();
-    const mes = hoje.getMonth() - nascimento.getMonth();
-    
-    if (mes < 0 || (mes === 0 && hoje.getDate() < nascimento.getDate())) {
-      idade--;
-    }
-    
-    return idade;
-  },
-
-  // Truncar texto
-  truncateText(text, maxLength) {
-    if (!text || text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...';
-  },
-
-  // Capitalizar primeira letra
-  capitalize(text) {
-    if (!text) return '';
-    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
-  },
-
-  // Remover acentos
-  removeAccents(text) {
-    if (!text) return '';
-    return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  },
-
-  // Formatar valor percentual
-  formatPercent(value) {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'percent',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2
-    }).format((value || 0) / 100);
-  },
-
-  // Copiar texto para clipboard
-  async copyToClipboard(text) {
-    try {
-      await navigator.clipboard.writeText(text);
-      Utils.alert('Texto copiado para a área de transferência!', 'success');
-    } catch (error) {
-      console.error('Erro ao copiar texto:', error);
-      Utils.alert('Erro ao copiar texto.', 'error');
-    }
-  },
-
-  // Download de arquivo
-  downloadFile(content, filename, contentType = 'text/plain') {
-    const blob = new Blob([content], { type: contentType });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  }
-};
-=======
-  // Debounce para buscas
+  // Função debounce para evitar múltiplas execuções rápidas
   debounce(func, wait) {
     let timeout;
     return function(...args) {
@@ -598,17 +232,18 @@ Se tiver dúvidas, chama aqui! 👍`;
 
   // Ordena array por propriedade
   sortBy(array, property, ascending = true) {
-    return array.sort((a,b) => {
+    return array.sort((a, b) => {
+      if (a[property] === b[property]) return 0;
       if (ascending) return a[property] > b[property] ? 1 : -1;
       else return a[property] < b[property] ? 1 : -1;
     });
   },
 
   // Filtra array por texto em propriedades
-  filterByText(array, searchText, properties=[]) {
+  filterByText(array, searchText, properties = []) {
     if (!searchText) return array;
     const lowerSearchText = searchText.toLowerCase();
-    return array.filter(item => 
+    return array.filter(item =>
       properties.some(prop => {
         const value = item[prop];
         return value && value.toString().toLowerCase().includes(lowerSearchText);
@@ -616,4 +251,3 @@ Se tiver dúvidas, chama aqui! 👍`;
     );
   }
 };
->>>>>>> 3d9d87908cfcf02c68054e3ac557608d4a425c20
