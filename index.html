@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de EmprÃ©stimos</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Tela de Login -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-container">
+            <div class="login-header">
+                <i class="fas fa-money-bill-wave"></i>
+                <h1>Sistema de EmprÃ©stimos</h1>
+                <p>Acesse sua conta para continuar</p>
+            </div>
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="username" class="form-label">UsuÃ¡rio</label>
+                    <input type="text" id="username" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="password" class="form-label">Senha</label>
+                    <input type="password" id="password" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn--primary btn--full-width">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Entrar
+                </button>
+            </form>
+            <div class="login-footer">
+                <p><strong>UsuÃ¡rios de teste:</strong></p>
+                <p>admin / 123456 (Administrador)</p>
+                <p>gerente / 123456 (Gerente)</p>
+                <p>operador / 123456 (Operador)</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Principal -->
+    <div id="app" class="app hidden">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <button class="btn btn--outline btn--sm" id="toggleSidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="app-title">Sistema de EmprÃ©stimos</h1>
+            </div>
+            <div class="header-right">
+                <span class="user-info" id="userInfo">
+                    <i class="fas fa-user"></i>
+                    <span id="userName">UsuÃ¡rio</span>
+                </span>
+                <button class="btn btn--outline btn--sm" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Sair
+                </button>
+            </div>
+        </header>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <nav class="nav">
+                <a href="#" class="nav-link active" data-module="dashboard">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-link" data-module="clientes">
+                    <i class="fas fa-users"></i>
+                    <span>Clientes</span>
+                </a>
+                <a href="#" class="nav-link" data-module="emprestimos">
+                    <i class="fas fa-money-bill"></i>
+                    <span>EmprÃ©stimos</span>
+                </a>
+                <a href="#" class="nav-link" data-module="historico">
+                    <i class="fas fa-history"></i>
+                    <span>HistÃ³rico</span>
+                </a>
+                <a href="#" class="nav-link hidden" data-module="usuarios" id="usuariosNav">
+                    <i class="fas fa-user-cog"></i>
+                    <span>UsuÃ¡rios</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- ConteÃºdo Principal -->
+        <main class="main-content">
+            <!-- Dashboard -->
+            <div id="dashboardModule" class="module active">
+                <div class="module-header">
+                    <h2>Dashboard Financeiro</h2>
+                    <div class="metrics-controls">
+                        <button class="btn btn--outline btn--sm" id="refreshDashboard">
+                            <i class="fas fa-sync-alt"></i>
+                            Atualizar
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-icon metric-icon--success">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="metric-content">
+                            <h3 id="totalRecebido">R$ 0,00</h3>
+                            <p>Total Recebido</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon metric-icon--error">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="metric-content">
+                            <h3 id="totalPerdas">R$ 0,00</h3>
+                            <p>Perdas</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon metric-icon--info">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="metric-content">
+                            <h3 id="clientesAtivos">0</h3>
+                            <p>Clientes Ativos</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon metric-icon--warning">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="metric-content">
+                            <h3 id="vencimentosProximos">0</h3>
+                            <p>Venc. em 7 dias</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-charts">
+                    <div class="chart-container">
+                        <h3>EvoluÃ§Ã£o dos Ãltimos 6 Meses</h3>
+                        <div class="chart-wrapper" style="position: relative; height: 300px;">
+                            <canvas id="evolutionChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="top-clients">
+                        <h3>Top 5 Clientes (Juros Pagos)</h3>
+                        <div id="topClients" class="clients-ranking">
+                            <!-- Rankings serÃ£o inseridos aqui -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clientes -->
+            <div id="clientesModule" class="module">
+                <div class="module-header">
+                    <h2>GestÃ£o de Clientes</h2>
+                    <button class="btn btn--primary" id="addClienteBtn">
+                        <i class="fas fa-plus"></i>
+                        Novo Cliente
+                    </button>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table" id="clientesTable">
+                        <thead>
+                            <tr>
+                                <th>Foto</th>
+                                <th>Nome</th>
+                                <th>Contato</th>
+                                <th>CPF</th>
+                                <th>Status</th>
+                                <th>AÃ§Ãµes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dados serÃ£o inseridos aqui -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- EmprÃ©stimos -->
+            <div id="emprestimosModule" class="module">
+                <div class="module-header">
+                    <h2>Controle de EmprÃ©stimos</h2>
+                    <div class="module-controls">
+                        <select id="statusFilter" class="form-control">
+                            <option value="">Todos os Status</option>
+                            <option value="ativo">Ativos</option>
+                            <option value="quitado">Quitados</option>
+                        </select>
+                        <button class="btn btn--primary" id="addEmprestimoBtn">
+                            <i class="fas fa-plus"></i>
+                            Novo EmprÃ©stimo
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table" id="emprestimosTable">
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Valor</th>
+                                <th>Juros</th>
+                                <th>Vencimento</th>
+                                <th>Status</th>
+                                <th>AÃ§Ãµes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dados serÃ£o inseridos aqui -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- HistÃ³rico -->
+            <div id="historicoModule" class="module">
+                <div class="module-header">
+                    <h2>HistÃ³rico de Pagamentos</h2>
+                    <div class="module-controls">
+                        <select id="clienteHistoricoFilter" class="form-control">
+                            <option value="">Todos os Clientes</option>
+                        </select>
+                        <select id="tipoHistoricoFilter" class="form-control">
+                            <option value="">Todos os Tipos</option>
+                            <option value="juros">Juros</option>
+                            <option value="quitacao">QuitaÃ§Ã£o</option>
+                        </select>
+                        <input type="date" id="dataInicioFilter" class="form-control" placeholder="Data InÃ­cio">
+                        <input type="date" id="dataFimFilter" class="form-control" placeholder="Data Fim">
+                        <button class="btn btn--outline btn--sm" id="limparFiltrosBtn">
+                            <i class="fas fa-times"></i>
+                            Limpar Filtros
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table" id="historicoTable">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Cliente</th>
+                                <th>Valor</th>
+                                <th>Tipo</th>
+                                <th>ObservaÃ§Ãµes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dados serÃ£o inseridos aqui -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- UsuÃ¡rios -->
+            <div id="usuariosModule" class="module">
+                <div class="module-header">
+                    <h2>GestÃ£o de UsuÃ¡rios</h2>
+                    <button class="btn btn--primary" id="addUsuarioBtn">
+                        <i class="fas fa-plus"></i>
+                        Novo UsuÃ¡rio
+                    </button>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table" id="usuariosTable">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>UsuÃ¡rio</th>
+                                <th>NÃ­vel</th>
+                                <th>Status</th>
+                                <th>Superior</th>
+                                <th>AÃ§Ãµes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dados serÃ£o inseridos aqui -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+
+        <!-- NavegaÃ§Ã£o Mobile -->
+        <nav class="mobile-nav">
+            <a href="#" class="mobile-nav-link active" data-module="dashboard">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="mobile-nav-link" data-module="clientes">
+                <i class="fas fa-users"></i>
+                <span>Clientes</span>
+            </a>
+            <a href="#" class="mobile-nav-link" data-module="emprestimos">
+                <i class="fas fa-money-bill"></i>
+                <span>EmprÃ©stimos</span>
+            </a>
+            <a href="#" class="mobile-nav-link" data-module="historico">
+                <i class="fas fa-history"></i>
+                <span>HistÃ³rico</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Modais -->
+    <!-- Modal Cliente -->
+    <div id="clienteModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="clienteModalTitle">Novo Cliente</h3>
+                <button class="modal-close" id="closeClienteModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="clienteForm" class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="clienteNome" class="form-label">Nome Completo</label>
+                        <input type="text" id="clienteNome" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="clienteContato" class="form-label">Contato</label>
+                        <input type="text" id="clienteContato" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="clienteCpf" class="form-label">CPF</label>
+                        <input type="text" id="clienteCpf" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="clienteDataNascimento" class="form-label">Data de Nascimento</label>
+                        <input type="date" id="clienteDataNascimento" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="clienteEndereco" class="form-label">EndereÃ§o</label>
+                    <input type="text" id="clienteEndereco" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="clienteFoto" class="form-label">Foto do Cliente</label>
+                    <input type="file" id="clienteFoto" class="form-control" accept="image/*">
+                    <div id="fotoPreview" class="foto-preview hidden">
+                        <img id="previewImg" src="" alt="Preview">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="clienteObservacoes" class="form-label">ObservaÃ§Ãµes</label>
+                    <textarea id="clienteObservacoes" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn--outline" id="cancelClienteBtn">Cancelar</button>
+                    <button type="submit" class="btn btn--primary">Salvar Cliente</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal EmprÃ©stimo -->
+    <div id="emprestimoModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="emprestimoModalTitle">Novo EmprÃ©stimo</h3>
+                <button class="modal-close" id="closeEmprestimoModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="emprestimoForm" class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="emprestimoCliente" class="form-label">Cliente</label>
+                        <select id="emprestimoCliente" class="form-control" required>
+                            <option value="">Selecione um cliente</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="emprestimoValor" class="form-label">Valor (R$)</label>
+                        <input type="number" id="emprestimoValor" class="form-control" step="0.01" min="0" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="emprestimoJuros" class="form-label">Taxa de Juros Mensal (%)</label>
+                        <input type="number" id="emprestimoJuros" class="form-control" step="0.01" min="0" max="100" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="emprestimoVencimento" class="form-label">Data de Vencimento</label>
+                        <input type="date" id="emprestimoVencimento" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">CÃ¡lculo AutomÃ¡tico</label>
+                    <div id="calculoPreview" class="calc-preview">
+                        <p>Juros Mensal: <span id="jurosMensal">R$ 0,00</span></p>
+                        <p>Total com Juros: <span id="totalComJuros">R$ 0,00</span></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn--outline" id="cancelEmprestimoBtn">Cancelar</button>
+                    <button type="submit" class="btn btn--primary">Criar EmprÃ©stimo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Pagamento -->
+    <div id="pagamentoModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Registrar Pagamento</h3>
+                <button class="modal-close" id="closePagamentoModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="pagamentoForm" class="modal-body">
+                <div class="form-group">
+                    <label for="pagamentoValor" class="form-label">Valor (R$)</label>
+                    <input type="number" id="pagamentoValor" class="form-control" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="pagamentoTipo" class="form-label">Tipo</label>
+                    <select id="pagamentoTipo" class="form-control" required>
+                        <option value="juros">Pagamento de Juros</option>
+                        <option value="quitacao">QuitaÃ§Ã£o Total</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="pagamentoObservacoes" class="form-label">ObservaÃ§Ãµes</label>
+                    <textarea id="pagamentoObservacoes" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn--outline" id="cancelPagamentoBtn">Cancelar</button>
+                    <button type="submit" class="btn btn--primary">Registrar Pagamento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal UsuÃ¡rio -->
+    <div id="usuarioModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="usuarioModalTitle">Novo UsuÃ¡rio</h3>
+                <button class="modal-close" id="closeUsuarioModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="usuarioForm" class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="usuarioNome" class="form-label">Nome Completo</label>
+                        <input type="text" id="usuarioNome" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="usuarioUsername" class="form-label">Nome de UsuÃ¡rio</label>
+                        <input type="text" id="usuarioUsername" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="usuarioPassword" class="form-label">Senha</label>
+                        <input type="password" id="usuarioPassword" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="usuarioNivel" class="form-label">NÃ­vel</label>
+                        <select id="usuarioNivel" class="form-control" required>
+                            <option value="operador">Operador</option>
+                            <option value="gerente">Gerente</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="usuarioSuperior" class="form-label">Superior</label>
+                    <select id="usuarioSuperior" class="form-control">
+                        <option value="">Nenhum</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn--outline" id="cancelUsuarioBtn">Cancelar</button>
+                    <button type="submit" class="btn btn--primary">Salvar UsuÃ¡rio</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- NotificaÃ§Ãµes -->
+    <div id="notifications" class="notifications-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
